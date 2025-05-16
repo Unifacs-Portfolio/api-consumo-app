@@ -15,8 +15,6 @@
     "type": "git",
     "url": "git+https://github.com/AAndreLuis-dev/api-app.git"
   },
-  "author": "Andre Luis",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/AAndreLuis-dev/api-app/issues"
   },
@@ -24,7 +22,8 @@
   "devDependencies": {
     "express": "^4.21.1",
     "jest": "^29.7.0",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "prisma": "^6.8.1"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.6",
