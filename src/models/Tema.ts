@@ -1,13 +1,25 @@
-import { supabase } from '../supabase/client.js';
+import { supabase } from '../supabase/client';
+
+interface SubtemaInterface {
+    id: number;
+    descricao: string;
+}
 
 class Tema {
-    constructor({ id, descricao }) {
+
+    // Definindo os atributos da classe
+    id: number;
+    descricao: string;
+
+    // Construtor da classe
+    constructor({ id, descricao } : SubtemaInterface) {
         this.id = id;
         this.descricao = descricao;
     }
 
+    // Método para validar os dados do tema
     validate() {
-        const errors = [];
+        let errors = [];
 
         if (!this.descricao || typeof this.descricao !== 'string') {
             errors.push(`A descrição "${this.descricao}" não é válida.`);
@@ -20,8 +32,8 @@ class Tema {
         return { valid: true };
     }
 
-    async save() {
-        const { data, error } = await supabase
+    async save(): Promise<SubtemaInterface> {
+        let { data, error } = await supabase
             .from('tema')
             .insert([{ descricao: this.descricao }])
             .select();
@@ -30,11 +42,16 @@ class Tema {
             throw new Error('Erro ao salvar o tema: ' + error.message);
         }
 
+        // Verificação para garantir que data não é null ou vazio
+        if (!data || data.length === 0) {
+            throw new Error('Nenhum dado retornado ao salvar o tema.');
+        }
+
         return data[0];
     }
 
-    static async findById(id) {
-        const { data, error } = await supabase
+    static async findById(id: number) {
+        let { data, error } = await supabase
             .from('tema')
             .select('*')
             .eq('id', id)
@@ -47,8 +64,8 @@ class Tema {
         return data;
     }
 
-    static async deleteById(id) {
-        const { data, error } = await supabase
+    static async deleteById(id: number) {
+        let { data, error } = await supabase
             .from('tema')
             .delete()
             .eq('id', id)

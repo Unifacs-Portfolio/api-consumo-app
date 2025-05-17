@@ -1,28 +1,33 @@
-import Ingrediente from '../models/Ingrediente.js';
-import { supabase } from '../supabase/client.js';
+import Ingrediente from '../models/Ingrediente';
+import { supabase } from '../supabase/client';
+import { Request, Response } from 'express';
 
 class IngredienteController {
 
-    async store(req, res) {
+    async store(req:Request, res:Response) {
         try {
             const ingrediente = new Ingrediente(req.body);
 
             const { valid, errors } = ingrediente.validate();
 
             if (!valid) {
-                handleError(res, errors, 400, 'Ingrediente Inválido');
+                handleError(res, errors ?.join(', ') || '', 400, 'Ingrediente Inválido');
             }
 
-            await ingrediente.save();
+            const { postagemId } = req.body;
+
+            if (!postagemId) throw new Error('postagemId é obrigatório');
+
+            const { data, error } = await ingrediente.save(postagemId);
 
             return res.status(201).json({ message: 'Ingrediente adicionado com sucesso', data: data });
 
         } catch (e) {
-            handleError(res, e.message)
+            handleError(res, String(e))
         }
     }
 
-    async index(req, res) {
+    async index(req:Request, res:Response) {
         try {
             const { data: ingredientes, error } = await supabase
                 .from('ingredientes')
@@ -33,12 +38,15 @@ class IngredienteController {
             return res.json(ingredientes);
 
         } catch (e) {
-            handleError(res, e)
+            if (e instanceof Error) {
+            handleError(res, e.message)
+            }
         }
+
     }
 
 
-    async show(req, res) {
+    async show(req:Request, res:Response) {
         try {
             const { data: ingrediente, error } = await supabase
                 .from('ingredientes')
@@ -52,16 +60,14 @@ class IngredienteController {
 
             return res.json(ingrediente);
         } catch (e) {
+             if (e instanceof Error) {
             handleError(res, e.message);
+             }
         }
     }
 
-    async update(req, res) {
+    async update(req:Request, res:Response) {
         try {
-            if (!valid) {
-                return res.status(400).json({ message: 'Esse ingrediente não é válido', errors: errors });
-            }
-
             const updateIngrediente = new Ingrediente(req.body);
 
             const { valid, errors } = updateIngrediente.validate();
@@ -75,6 +81,9 @@ class IngredienteController {
                 }])
                 .eq('ingrediente_id', req.params.ingredienteId)
                 .select();
+            if (!valid) {
+                return res.status(400).json({ message: 'Esse ingrediente não é válido', errors: errors });
+            }
 
             if (updateError) throw updateError;
 
@@ -85,11 +94,13 @@ class IngredienteController {
             return res.status(200).json({ message: 'Ingrediente atualizado com sucesso', data: updatedIngrediente[0] });
 
         } catch (e) {
+             if (e instanceof Error) {
             handleError(res, e.message);
+             }
         }
     }
 
-    async delete(req, res) {
+    async delete(req:Request, res:Response) {
         try {
             const { data, error: deleteError } = await supabase
                 .from('ingredientes')
@@ -106,12 +117,14 @@ class IngredienteController {
             return res.status(204).end();
 
         } catch (e) {
+             if (e instanceof Error) {
             handleError(res, e.message)
+            }
         }
     }
 }
 
-function handleError(res, detail = 'An error has occurred.', status = 500, message = 'Internal Server Error') {
+function handleError(res:Response, detail = 'An error has occurred.', status = 500, message = 'Internal Server Error') {
     if (!res.headersSent) {
         return res.status(status).json({ message: message, detail: detail });
     }

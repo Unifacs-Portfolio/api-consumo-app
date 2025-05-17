@@ -1,14 +1,22 @@
-import {supabase} from "../supabase/client.js";
+import {supabase} from "../supabase/client";
 
 class Ingrediente {
-    constructor({ nomeIngrediente, quantidade, medida }) {
+
+    // Definindo os atributos da classe
+    nomeIngrediente: string;
+    quantidade: number;
+    medida: string;
+
+    // Construtor da classe
+    constructor({ nomeIngrediente, quantidade, medida }: { nomeIngrediente: string; quantidade: number; medida: string }) {
         this.nomeIngrediente = nomeIngrediente;
         this.quantidade = quantidade;
         this.medida = medida;
     }
 
+    // Método para validar os dados do ingrediente
     validate() {
-        const errors = [];
+        let errors = [];
 
         if (this.nomeIngrediente.length < 1 || this.nomeIngrediente.length > 20) {
             errors.push('Nome do ingrediente deve ter entre 1 e 20 caracteres.');
@@ -29,7 +37,8 @@ class Ingrediente {
         return { valid: true };
     }
 
-    async save(postagemId) {
+    // Método para salvar o ingrediente no banco de dados
+    async save(postagemId: number): Promise<{ data: any[] | null, error: Error | null }> {
         const { data, error } = await supabase
             .from('ingredientes')
             .insert([
@@ -45,7 +54,8 @@ class Ingrediente {
             throw new Error(error.message);
         }
 
-        return data;
+        return { data, error };
     }
 }
+
 export default Ingrediente;

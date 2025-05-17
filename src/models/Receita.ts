@@ -1,5 +1,29 @@
+interface ReceitaInterface {
+    id: number;
+    titulo: string;
+    conteudo: string;
+    isVerify: boolean;
+    idUsuario: number;
+    verifyBy: string;
+    dataCriacao: string;
+    ultimaAlteracao: string;
+    fotos: string[];
+}
+
 class Receita {
-    constructor(receita) {
+
+    // Definição dos atributos da receita
+    id: number;
+    titulo: string;
+    conteudo: string;
+    isVerify: boolean;
+    idUsuario: number;
+    verifyBy: string;
+    dataCriacao: string;
+    ultimaAlteracao: string;
+    fotos: string[];
+
+    constructor(receita: ReceitaInterface) {
         this.id = receita.id;
         this.titulo = receita.titulo;
         this.conteudo = receita.conteudo;
@@ -12,7 +36,7 @@ class Receita {
     }
 
     validate() {
-        const errors = [];
+        let errors = [];
 
         // Validação do título
         if (!this.titulo) {
@@ -79,7 +103,7 @@ class Receita {
     }
 
     // Método para verificar a receita
-    verify(verifyBy) {
+    verify(verifyBy: string) {
         if (!verifyBy) {
             throw new Error("VerifyBy é obrigatório para verificar a receita.");
         }
@@ -89,7 +113,7 @@ class Receita {
     }
 
     // Método para adicionar foto
-    addFoto(fotoUrl) {
+    addFoto(fotoUrl: string) {
         if (!this.fotos) this.fotos = [];
         if (this.fotos.length >= 8) {
             throw new Error("Máximo de 8 fotos atingido.");
@@ -99,7 +123,7 @@ class Receita {
     }
 
     // Método para remover foto
-    removeFoto(fotoUrl) {
+    removeFoto(fotoUrl: string) {
         if (!this.fotos) return;
         this.fotos = this.fotos.filter(f => f !== fotoUrl);
         this.updateLastModified();

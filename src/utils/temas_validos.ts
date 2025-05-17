@@ -6,6 +6,6 @@ export const TEMAS_VALIDOS = [
     'Cosme'
 ]
 
-export function isThemeValid(theme) {
+export function isThemeValid(theme: string) {
     return TEMAS_VALIDOS.includes(theme);
 }

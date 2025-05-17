@@ -1,11 +1,12 @@
-import express from 'express';
-import multer from 'multer';
-import ReceitaController from '../controllers/receitaController.js';
+import express, { Router } from 'express';
+import multer, { Multer } from 'multer';
+import ReceitaController from '../controllers/receitaController';
+import {Request, Response, NextFunction, RequestHandler } from 'express-serve-static-core';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Configuração do Multer
-const upload = multer({
+const upload: Multer = multer({
     storage: multer.memoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB
@@ -13,7 +14,7 @@ const upload = multer({
 });
 
 // Middleware para processar form-data
-const processFormData = (req, res, next) => {
+const processFormData: RequestHandler = (req: Request, res:Response, next:NextFunction) => {
     upload.array('files', 8)(req, res, function(err) {
         if (err instanceof multer.MulterError) {
             return res.status(400).json({

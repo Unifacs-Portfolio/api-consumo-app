@@ -1,12 +1,12 @@
-import express from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import swaggerJsDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import userRoutes from './routes/userRoutes.js';
-import dicasRoutes from './routes/dicaRoutes.js';
-import temaRoutes from './routes/temaRoutes.js';
-import receitaRoutes from './routes/receitaRoutes.js';
+import userRoutes from './routes/userRoutes';
+import dicasRoutes from './routes/dicaRoutes';
+import temaRoutes from './routes/temaRoutes';
+import receitaRoutes from './routes/receitaRoutes';
 
 const swaggerOptions = {
     definition: {
@@ -35,6 +35,7 @@ const CSS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 class App {
+    app:Application
     constructor() {
         this.app = express();
         this.middlewares();

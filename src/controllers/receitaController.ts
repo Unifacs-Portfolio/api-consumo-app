@@ -1,9 +1,16 @@
-import { supabase } from '../supabase/client.js';
-import { TEMAS_VALIDOS } from '../utils/temas_validos.js';
-import Ingrendiente from "../models/Ingrediente.js";
+import { supabase } from '../supabase/client';
+import { TEMAS_VALIDOS } from '../utils/temas_validos';
+import Ingrendiente from "../models/Ingrediente";
+import { Request, Response } from 'express';
+
+interface Correlacao {
+  subtema: string;
+  tema: string;
+}
 
 class ReceitaController {
-    async create(req, res) {
+
+    async create(req:Request, res:Response): Promise<void> {
         let imageUrls = [];
         try {
             if (!req.body.titulo || !req.body.conteudo || !req.body.idUsuario || !req.body.tema || !req.body.subtema) {
@@ -89,7 +96,7 @@ class ReceitaController {
             if (Array.isArray(ingredientes) && ingredientes.length > 0) {
                 for (const ingrediente of ingredientes) {
                     const ingredienteObj = new Ingrendiente(ingrediente);
-                    const { valid, errors } = ingredienteObj.validate();
+                    const { valid, errors = []} = ingredienteObj.validate();
     
                     if (!valid) {
                         throw new Error(errors.join(', '));
@@ -100,7 +107,7 @@ class ReceitaController {
             }
             
 
-            if (req.files?.length > 0) {
+            if (Array.isArray(req.files) && req.files.length > 0) {
                 for (const file of req.files) {
                     const fileName = `${receitaData.id}-${Date.now()}-${file.originalname}`;
                     const { error: uploadError } = await supabase.storage
@@ -129,21 +136,24 @@ class ReceitaController {
                 }
             }
 
-            return res.status(201).json({
+            res.status(201).json({
                 message: 'Receita criada com sucesso',
                 data: {
                     ...receitaData,
                     fotos: imageUrls
                 }
             });
+            
         } catch (e) {
             console.log(e)
-            return handleError(res, e.message);
+            if (e instanceof Error) {
+             handleError(res, e.message);
+             return;
+            }
         }
     }
 
-
-    async getAll(req, res) {
+    async getAll(req:Request, res:Response): Promise<void> {
         try {
             const { data: receitas, error: receitasError } = await supabase
                 .from('receitas')
@@ -155,7 +165,7 @@ class ReceitaController {
             const receitasComDetalhes = await Promise.all(receitas.map(async (receita) => {
                 const subtemas = new Set();
 
-                receita.correlacaoReceitas?.forEach(correlacao => {
+                receita.correlacaoReceitas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -170,17 +180,21 @@ class ReceitaController {
                     ultimaAlteracao: receita.ultimaAlteracao,
                     tema: receita.correlacaoReceitas?.[0]?.tema,
                     subtemas: Array.from(subtemas),
-                    fotos: receita.fotosReceitas?.map(foto => foto.url) || []
+                    fotos: receita.fotosReceitas?.map((foto: { url: string }) => foto.url) || []
                 };
             }));
 
-            return res.json(receitasComDetalhes);
+             res.json(receitasComDetalhes);
+             return;
         } catch (e) {
-            return handleError(res, e.message);
+            if (e instanceof Error) {
+             handleError(res, e.message);
+             return;
+            }
         }
     }
 
-    async getById(req, res) {
+    async getById(req:Request, res:Response): Promise<void> {
         try {
             const { data: receita, error: receitaError } = await supabase
                 .from('receitas')
@@ -193,15 +207,15 @@ class ReceitaController {
                 .eq('id', req.params.id)
                 .single();
 
-            if (!receita) return handleError(res, 'Receita não encontrada', 404);
+            if (!receita) handleError(res, 'Receita não encontrada', 404);
             if (receitaError) throw receitaError;
-
+                    
             const tema = receita.correlacaoReceitas?.[0]?.tema || null;
-            const subtemas = receita.correlacaoReceitas?.map(correlacao => correlacao.subtema) || [];
+            const subtemas = receita.correlacaoReceitas?.map((correlacao: Correlacao) => correlacao.subtema) || [];
             const ingredientes = receita.ingredientes || [];
-            const fotos = receita.fotosReceitas?.map(foto => foto.url) || [];
+            const fotos = receita.fotosReceitas?.map((foto: { url: string }) => foto.url) || [];
 
-            return res.json({
+                 res.json({
                 id: receita.id,
                 titulo: receita.titulo,
                 conteudo: receita.conteudo,
@@ -215,16 +229,21 @@ class ReceitaController {
                 ingredientes,
                 fotos
             });
+            return;
         } catch (e) {
-            return handleError(res, e.message);
+            if (e instanceof Error) {
+             handleError(res, e.message);
+             return;
+            }
         }
     }
 
-    async update(req, res) {
+    async update(req:Request, res:Response): Promise<void> {
         let imageUrls = [];
         try {
             if (!req.body.titulo && !req.body.conteudo && !req.files?.length) {
-                return handleError(res, 'Nenhum dado para atualizar foi fornecido', 400);
+                 handleError(res, 'Nenhum dado para atualizar foi fornecido', 400);
+                 return;
             }
 
             const { data: receita, error: findError } = await supabase
@@ -234,7 +253,8 @@ class ReceitaController {
                 .single();
 
             if (findError || !receita) {
-                return handleError(res, 'Receita não encontrada', 404);
+                 handleError(res, 'Receita não encontrada', 404);
+                 return;
             }
 
             const { data: correlacao, error: correlacaoError } = await supabase
@@ -309,23 +329,29 @@ class ReceitaController {
 
                 for (const ingrediente of req.body.ingredientes) {
                     const ingredienteObj = new Ingrendiente(ingrediente);
-                    const { valid, errors } = ingredienteObj.validate();
+                    const { valid, errors =[] } = ingredienteObj.validate();
+                   
+                    const id = Number(req.params.id); //transforma a string em um number por conta que o .save pede um number
+
+                      if (isNaN(id)) {
+                      throw new Error('ID inválido');
+                           }
 
                     if (!valid) {
                         throw new Error(errors.join(', '));
                     }
 
-                    await ingredienteObj.save(req.params.id);
+                    await ingredienteObj.save(id);
                 }
             }
 
-            if (req.files?.length > 0) {
+            if (Array.isArray(req.files) && req.files.length > 0) {
                 const { data: fotosAntigas } = await supabase
                     .from('fotosReceitas')
                     .select('*')
                     .eq('id', req.params.id);
 
-                if (fotosAntigas?.length > 0) {
+                if (fotosAntigas && fotosAntigas.length > 0) {
                     for (const foto of fotosAntigas) {
                         const fileName = foto.url.split('/fotosReceitas/').pop();
                         await supabase.storage
@@ -386,24 +412,31 @@ class ReceitaController {
 
             if (updateError) throw updateError;
 
-            return res.json({
+            res.json({
                 message: 'Receita atualizada com sucesso',
                 data: { ...receitaAtualizada, fotos: imageUrls }
             });
+            return;
 
         } catch (e) {
             if (imageUrls.length > 0) {
                 for (const url of imageUrls) {
-                    const fileName = url.split('/fotosReceitas/').pop();
-                    await supabase.storage.from('fotosReceitas').remove([fileName]);
+                    const fileName: string | undefined= url.split('/fotosReceitas/').pop();
+                    if (fileName) {
+                        await supabase.storage
+                            .from('fotosReceitas')
+                            .remove([fileName]);
+                    }
                 }
             }
-            return handleError(res, e.message);
+            if (e instanceof Error) {
+             handleError(res, e.message);
+             return;
+            }
         }
     }
 
-
-    async delete(req, res) {
+    async delete(req:Request, res:Response): Promise<void> {
         try {
             const { data: receita, error: findError } = await supabase
                 .from('receitas')
@@ -412,7 +445,8 @@ class ReceitaController {
                 .single();
 
             if (findError || !receita) {
-                return handleError(res, 'Receita não encontrada', 404);
+                 handleError(res, 'Receita não encontrada', 404);
+                 return;
             }
 
             // Primeiro, buscar todas as fotos da receita
@@ -458,37 +492,45 @@ class ReceitaController {
 
             if (deleteError) throw deleteError;
 
-            return res.json({
+             res.json({
                 message: 'Receita e fotos deletadas com sucesso'
             });
+            return;
+        
 
         } catch (e) {
             console.error('Erro completo:', e);
-            return handleError(res, e.message);
+            if (e instanceof Error) {
+             handleError(res, e.message);
+             return;
+            }
         }
     }
 
-    async verify(req, res) {
+    async verify(req:Request, res:Response): Promise<void> {
         try {
             const verifyBy = req.body.verifyBy;
             const id = req.params.id;
 
             if (!verifyBy) {
-                return handleError(res, `O campo 'verifyBy' é obrigátorio.`, 400, 'Input inválido');
+                 handleError(res, `O campo 'verifyBy' é obrigátorio.`, 400, 'Input inválido');
+                 return;
             }
 
-            const { data: user, userError } = await supabase
+            const { data: user,  error :userError } = await supabase
                 .from('usuarios')
                 .select('isMonitor')
                 .eq('email', verifyBy)
                 .maybeSingle();
 
             if (!user || userError) {
-                return handleError(res, `O usuário com o email ${verifyBy} não foi encontrado.`, 404, 'Usuário não encontrado');
+                 handleError(res, `O usuário com o email ${verifyBy} não foi encontrado.`, 404, 'Usuário não encontrado');
+                return;
             }
 
             if (!user.isMonitor) {
-                return handleError(res, `O usuário com o email ${verifyBy} não é um monitor.`, 400, 'Usuário não é monitor');
+                 handleError(res, `O usuário com o email ${verifyBy} não é um monitor.`, 400, 'Usuário não é monitor');
+                return;
             }
 
             const { data: receita, error } = await supabase
@@ -502,40 +544,48 @@ class ReceitaController {
                 .select();
 
             if (error) throw error;
-            if (!receita) return handleError(res, 'Receita não encontrada', 404);
+            if (!receita)  handleError(res, 'Receita não encontrada', 404);
+            return;
 
-            return res.json({
+             res.json({
                 message: 'Receita verificada com sucesso',
                 data: receita
             });
+            return;
         } catch (e) {
-            return handleError(res, e.message);
+            if (e instanceof Error) {
+            handleError(res, e.message);
+            return;
+            }
         }
     }
-    async getAllVerifiedByTheme(req, res) {
+
+    async getAllVerifiedByTheme(req:Request, res:Response): Promise<void> {
         try {
             const { tema } = req.params;
             if (!TEMAS_VALIDOS.includes(tema)) {
-                return handleError(res, `O tema ${tema} não é um tema válido. Temas válidos: ${TEMAS_VALIDOS.join(', ')}.`, 400, 'Input inválido');
+                 handleError(res, `O tema ${tema} não é um tema válido. Temas válidos: ${TEMAS_VALIDOS.join(', ')}.`, 400, 'Input inválido');
+                return;
             }
             const { data: idPost, error: idPostError } = await supabase
                 .from('correlacaoReceitas')
                 .select('idReceita')
                 .eq('tema', tema);
+                
 
-            if (idPostError) return handleError(res, idPostError.message, 500, idPostError.details);
-            if (!idPost) return handleError(res, 'Nenhuma receita encontrada', 404);
+            if (idPostError)  handleError(res, idPostError.message, 500, idPostError.details);
+            if (!idPost) handleError(res, 'Nenhuma receita encontrada', 404);
 
             const { data: receitas, error } = await supabase
                 .from('receitas')
                 .select()
                 .in('id', idPost.map(post => post.idReceita))
                 .eq('isVerify', true);
-            if (error) return handleError(res, error.message, 500, error.details);
+            if (error)  handleError(res, error.message, 500, error.details);
             const receitasComDetalhes = await Promise.all(receitas.map(async (receita) => {
                 const subtemas = new Set();
 
-                receita.correlacaoReceitas?.forEach(correlacao => {
+                receita.correlacaoReceitas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -550,16 +600,21 @@ class ReceitaController {
                     ultimaAlteracao: receita.ultimaAlteracao,
                     tema: receita.correlacaoReceitas?.[0]?.tema,
                     subtemas: Array.from(subtemas),
-                    fotos: receita.fotosReceitas?.map(foto => foto.url) || []
+                    fotos: receita.fotosReceitas?.map((foto: { url: string }) => foto.url) || []
                 };
             }));
 
-            return res.json(receitasComDetalhes);
+             res.json(receitasComDetalhes);
+             return;
         } catch (e) {
-            return handleError(res, e.message);
+            if (e instanceof Error) {
+             handleError(res, e.message);
+             return;
+            }
         }
     }
-    async getAllNotVerifiedByTheme(req, res) {
+
+    async getAllNotVerifiedByTheme(req:Request, res:Response): Promise<void> {
         try {
             const { tema } = req.params;
             if (!TEMAS_VALIDOS.includes(tema)) {
@@ -582,7 +637,7 @@ class ReceitaController {
             const receitasComDetalhes = await Promise.all(receitas.map(async (receita) => {
                 const subtemas = new Set();
 
-                receita.correlacaoReceitas?.forEach(correlacao => {
+                receita.correlacaoReceitas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -597,16 +652,20 @@ class ReceitaController {
                     ultimaAlteracao: receita.ultimaAlteracao,
                     tema: receita.correlacaoReceitas?.[0]?.tema,
                     subtemas: Array.from(subtemas),
-                    fotos: receita.fotosReceitas?.map(foto => foto.url) || []
+                    fotos: receita.fotosReceitas?.map((foto: { url: string }) => foto.url) || []
                 };
             }));
 
-            return res.json(receitasComDetalhes);
+             res.json(receitasComDetalhes);
+             return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
-    async getAllByTheme(req, res) {
+    
+    async getAllByTheme(req:Request, res:Response): Promise<void> {
         try {
             const { tema } = req.params;
             if (!TEMAS_VALIDOS.includes(tema)) {
@@ -629,7 +688,7 @@ class ReceitaController {
             const receitasComDetalhes = await Promise.all(receitas.map(async (receita) => {
                 const subtemas = new Set();
 
-                receita.correlacaoReceitas?.forEach(correlacao => {
+                receita.correlacaoReceitas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -644,19 +703,20 @@ class ReceitaController {
                     ultimaAlteracao: receita.ultimaAlteracao,
                     tema: receita.correlacaoReceitas?.[0]?.tema,
                     subtemas: Array.from(subtemas),
-                    fotos: receita.fotosReceitas?.map(foto => foto.url) || []
+                    fotos: receita.fotosReceitas?.map((foto: { url: string }) => foto.url) || []
                 };
             }));
 
-            return res.json(receitasComDetalhes);
+             res.json(receitasComDetalhes);
+             return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-
-
-    async getReceitasPorSubtemas(req, res) {
+    async getReceitasPorSubtemas(req:Request, res:Response): Promise<void> {
         try {
             const tema = req.params.tema;
             const subtemas = req.params.subtema.split(',');
@@ -671,16 +731,19 @@ class ReceitaController {
 
             if (correlacaoError) {
                 console.error('Erro ao buscar correlações:', correlacaoError);
-                return res.status(500).json({ error: `Erro ao buscar correlações de receitas: ${correlacaoError.message}` });
+                 res.status(500).json({ error: `Erro ao buscar correlações de receitas: ${correlacaoError.message}` });
+                 return;
             }
 
             if (!correlacoes || correlacoes.length === 0) {
-                return res.status(200).json([]);
+                 res.status(200).json([]);
+                 return;
             }
 
             const idsReceitas = [...new Set(correlacoes.map(correlacao => correlacao.idReceita))];
             if (idsReceitas.length === 0) {
-                return res.status(200).json([]);
+                 res.status(200).json([]);
+                 return;
             }
 
             const { data: receitas, error: receitasError } = await supabase
@@ -691,13 +754,14 @@ class ReceitaController {
 
             if (receitasError) {
                 console.error('Erro ao buscar receitas:', receitasError);
-                return res.status(500).json({ error: `Erro ao buscar as receitas: ${receitasError.message}` });
+                 res.status(500).json({ error: `Erro ao buscar as receitas: ${receitasError.message}` });
+                 return;
             }
 
             const receitasComDetalhes = await Promise.all(receitas.map(async (receita) => {
                 const subtemas = new Set();
 
-                receita.correlacaoReceitas?.forEach(correlacao => {
+                receita.correlacaoReceitas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -712,27 +776,32 @@ class ReceitaController {
                     ultimaAlteracao: receita.ultimaAlteracao,
                     tema: receita.correlacaoReceitas?.[0]?.tema,
                     subtemas: Array.from(subtemas),
-                    fotos: receita.fotosReceitas?.map(foto => foto.url) || []
+                    fotos: receita.fotosReceitas?.map((foto: { url: string }) => foto.url) || []
                 };
             }));
 
-            return res.json(receitasComDetalhes);
+            res.json(receitasComDetalhes);
+            return;
         }
         catch (e) {
             console.error('Erro ao buscar receitas por subtemas:', e);
-            return res.status(500).json({ error: `Erro interno ao processar a solicitação: ${e.message}` });
+            if (e instanceof Error) {
+             res.status(500).json({ error: `Erro interno ao processar a solicitação: ${e.message}` });
+             return;
+            }
         }
     }
 }
 
-function handleError(res, detail = 'Ocorreu um erro.', status = 500) {
-    console.error('Erro:', detail);
+function handleError(res:Response, detail = 'Ocorreu um erro.', status = 500, DetaInter?: string): never {
+    console.error('Erro:',  DetaInter || detail);
     if (!res.headersSent) {
-        return res.status(status).json({
+        res.status(status).json({
             message: 'Erro',
             detail
         });
     }
+    throw new Error(detail);
 }
 
 export default new ReceitaController();

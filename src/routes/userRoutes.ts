@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import userController from '../controllers/userController.js';
-import userUpload from "../middlewares/uploadMiddleware.js";
-import authMiddleware from "../middlewares/authMiddleware.js";
-
-const router = new Router();
+import userController from '../controllers/userController';
+import userUpload from "../middlewares/uploadMiddleware"; 
+import authMiddleware from "../middlewares/authMiddleware"; 
+ 
+const router: Router = Router();
 
 /**
  * @swagger

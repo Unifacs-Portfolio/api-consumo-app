@@ -1,12 +1,14 @@
-import User from '../models/User.js';
-import { supabase } from '../supabase/client.js';
+import User from '../models/User';
+import { supabase } from '../supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import { Request, Response } from 'express';
+import { error } from 'console';
 
 class UserController {
-    async store(req, res) {
+    async store(req:Request, res:Response): Promise<void>{
         let uploadedImagePath = null;
         try {
             const user = new User({
@@ -21,13 +23,19 @@ class UserController {
             });
 
             const { valid, errors } = user.validate();
-            if (!valid) return res.status(400).json({ errors });
+            if (!valid)  res.status(400).json({ errors });
 
             let fotoUsuarioURL = null;
 
             // Se a imagem foi carregada
             if (req.file) {
                 const uploadResult = await uploadImage(req.file);
+                
+                
+             if (!uploadResult) {
+              res.status(500).json({ error: 'Erro ao fazer upload da imagem' });
+              return;
+            }
                 fotoUsuarioURL = uploadResult.url;
                 uploadedImagePath = uploadResult.path;
             }
@@ -54,10 +62,12 @@ class UserController {
                         .from('fotoPerfil')
                         .remove([uploadedImagePath]);
                 }
-                return res.status(500).json({ errors: [error.message] });
+                res.status(500).json({ errors: [error.message] });
+                return;
             }
 
-            return res.status(201).json({ message: 'Usuário criado com sucesso' });
+             res.status(201).json({ message: 'Usuário criado com sucesso' });
+             return;
 
         } catch (e) {
             if (uploadedImagePath) {
@@ -65,12 +75,15 @@ class UserController {
                     .from('fotoPerfil')
                     .remove([uploadedImagePath]);
             }
-            return res.status(400).json({ errors: [e.message] });
+            if (e instanceof Error) {
+             res.status(400).json({ errors: [e.message] });
+             return;
+            }
         }
     }
 
     //funcionando pos alteracao bd
-    async index(req, res) {
+    async index(req:Request, res:Response): Promise<void> {
         try {
             const { data: users, error } = await supabase
                 .from('usuarios')
@@ -78,14 +91,18 @@ class UserController {
 
             if (error) throw error;
 
-            return res.json(users);
+             res.json(users);
+             return;
 
         } catch (e) {
-            return res.status(400).json({ errors: [e.message] });
+            if (e instanceof Error) {
+             res.status(400).json({ errors: [e.message] });
+             return;
+            }
         }
     }
     //funcionando pos alteracao bd
-    async show(req, res) {
+    async show(req:Request, res:Response): Promise<void> {
         try {
             const { data: user, error } = await supabase
                 .from('usuarios')
@@ -94,17 +111,22 @@ class UserController {
                 .single();
 
             if (error || !user) {
-                return res.status(404).json({ errors: ['Usuário não encontrado'] });
+                 res.status(404).json({ errors: ['Usuário não encontrado'] });
+                 return;
             }
 
-            return res.json(user);
+             res.json(user);
+             return;
 
         } catch (e) {
-            return res.status(400).json({ errors: [e.message] });
+            if (e instanceof Error) {
+             res.status(400).json({ errors: [e.message] });
+             return;
+            }
         }
     }
     //Funcionando pos alteracao
-    async update(req, res) {
+    async update(req:Request, res:Response): Promise<void> {
         let uploadedImagePath = null;
         try {
             const { data: user, error: fetchError } = await supabase
@@ -114,13 +136,20 @@ class UserController {
                 .single();
     
             if (fetchError || !user) {
-                return res.status(400).json({ errors: ['Usuário não encontrado'] });
+                res.status(400).json({ errors: ['Usuário não encontrado'] });
+                return;
             }
     
             let fotoUsuarioURL = user["Foto.usu"];
     
             if (req.file) {
                 const uploadResult = await uploadImage(req.file);
+                
+            if (!uploadResult) {
+              res.status(500).json({ error: 'Erro ao fazer upload da imagem' });
+              return;
+            }
+
                 fotoUsuarioURL = uploadResult.url;
                 uploadedImagePath = uploadResult.path;
             }
@@ -141,21 +170,27 @@ class UserController {
     
             if (updateError) throw updateError;
     
-            return res.json({ message: 'Usuário atualizado com sucesso' });
+            res.json({ message: 'Usuário atualizado com sucesso' });
+            return;
     
         } catch (e) {
+            if (e instanceof Error) {
             console.error("Erro ao atualizar usuário:", e.message);
+            }
     
             if (uploadedImagePath) {
                 await supabase.storage.from('fotoPerfil').remove([uploadedImagePath]);
             }
-            return res.status(400).json({ errors: [e.message] });
+            if (e instanceof Error) {
+             res.status(400).json({ errors: [e.message] });
+             return;
+            }
         }
     }
     
     
     // Funcionando pos alteracao
-    async delete(req, res) {
+    async delete(req:Request, res:Response): Promise<void> {
         try {
             const { data: user, error: fetchError } = await supabase
                 .from('usuarios')
@@ -164,7 +199,8 @@ class UserController {
                 .single();
 
             if (fetchError || !user) {
-                return res.status(400).json({ errors: ['Usuário não encontrado'] });
+                 res.status(400).json({ errors: ['Usuário não encontrado'] });
+                 return;
             }
 
             const { error: deleteError } = await supabase
@@ -174,13 +210,17 @@ class UserController {
 
             if (deleteError) throw deleteError;
 
-            return res.json({ message: 'Usuário deletado com sucesso' });
+             res.json({ message: 'Usuário deletado com sucesso' });
+             return;
 
         } catch (e) {
-            return res.status(400).json({ errors: [e.message] });
+            if (e instanceof Error) {
+            res.status(400).json({ errors: [e.message] });
+            return;
+            }
         }
     }
-    async loginUser(req, res) {
+    async loginUser(req:Request, res:Response): Promise<void> {
         const { email, senha } = req.body;
     
         try {
@@ -194,39 +234,46 @@ class UserController {
     
             if (error || !user) {
                 console.error("Erro ao buscar usuário ou usuário não encontrado:", error);
-                return res.status(400).json({ error: 'Usuário não encontrado ou erro na busca' });
+                 res.status(400).json({ error: 'Usuário não encontrado ou erro na busca' });
+                 return;
             }
     
             console.log("Usuário encontrado:", user);
             if (!user.senha || !user.senha.startsWith('$')) {
                 console.error("Senha inválida ou não é um hash no banco de dados.");
-                return res.status(500).json({ error: 'Erro no registro do usuário' });
+                 res.status(500).json({ error: 'Erro no registro do usuário' });
+                 return;
             }
     
             const validPassword = await argon2.verify(user.senha, senha);
     
             if (!validPassword) {
                 console.error("Senha inválida para o usuário:", email);
-                return res.status(401).json({ error: 'Credenciais inválidas' });
+                res.status(401).json({ error: 'Credenciais inválidas' });
+                return;
             }
     
             console.log("Senha verificada com sucesso. Gerando token...");
     
             const token = jwt.sign(
                 { userId: user.id, email: user.email },
-                process.env.JWT_SECRET
+                process.env.JWT_SECRET as string
             );
     
             console.log("Token gerado com sucesso:", token);
     
-            return res.status(200).json({ message: 'Login bem-sucedido', token });
+             res.status(200).json({ message: 'Login bem-sucedido', token });
+             return;
         } catch (e) {
+            if (e instanceof Error) {
             console.error("Erro no processo de login:", e.message);
-            return res.status(500).json({ error: 'Erro interno do servidor' });
+             res.status(500).json({ error: 'Erro interno do servidor' });
+             return;
+            }
         }
     }
     
-async resetPasswordRequest(req, res) {
+async resetPasswordRequest(req:Request, res:Response): Promise<void> {
     const { email } = req.body;
 
     try {
@@ -237,12 +284,13 @@ async resetPasswordRequest(req, res) {
             .single();
 
         if (error || !user) {
-            return res.status(400).json({ error: 'Usuário não encontrado' });
+             res.status(400).json({ error: 'Usuário não encontrado' });
+             return;
         }
 
         const token = jwt.sign(
             { email: user.email },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET as string,
             { expiresIn: '1h' }
         );
 
@@ -264,18 +312,20 @@ async resetPasswordRequest(req, res) {
 
         await transporter.sendMail(mailOptions);
 
-        return res.status(200).json({ message: 'Token de redefinição de senha enviado com sucesso' });
+         res.status(200).json({ message: 'Token de redefinição de senha enviado com sucesso' });
+         return;
     } catch (e) {
         console.error(e);
-        return res.status(500).json({ error: 'Erro interno do servidor' });
+         res.status(500).json({ error: 'Erro interno do servidor' });
+         return;
     }
 }
-async resetPassword(req, res) {
+async resetPassword(req:Request, res:Response): Promise<void> {
     const { token } = req.params;
     const { newPassword } = req.body;
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { email: string };
         const email = decoded.email;
 
         const hashedPassword = await argon2.hash(newPassword);
@@ -286,31 +336,36 @@ async resetPassword(req, res) {
             .eq('email', email);
 
         if (error) {
-            return res.status(400).json({ error: 'Erro ao atualizar a senha' });
+             res.status(400).json({ error: 'Erro ao atualizar a senha' });
+             return;
         }
 
-        return res.status(200).json({ message: 'Senha atualizada com sucesso' });
+         res.status(200).json({ message: 'Senha atualizada com sucesso' });
+         return;
     } catch (e) {
-        if (e.name === 'TokenExpiredError') {
-            return res.status(400).json({ error: 'Token expirado' });
-        } else if (e.name === 'JsonWebTokenError') {
-            return res.status(400).json({ error: 'Token inválido' });
+        if (error.name === 'TokenExpiredError') {
+             res.status(400).json({ error: 'Token expirado' });
+             return;
+        } else if (error.name === 'JsonWebTokenError') {
+             res.status(400).json({ error: 'Token inválido' });
+             return;
         }
         
         console.error(e);
-        return res.status(500).json({ error: 'Erro interno do servidor' });
+         res.status(500).json({ error: 'Erro interno do servidor' });
+         return;
     }
 }
 
 }
-async function uploadImage(file) {
+async function uploadImage(file: Express.Multer.File) {
     try {
         const uniqueFileName = `${uuidv4()}-${file.originalname}`;
         const { data, error } = await supabase.storage
             .from('fotoPerfil')
             .upload(uniqueFileName, file.buffer, {
                 contentType: file.mimetype,
-            });
+            }); 
 
         if (error) throw new Error(`Erro ao fazer upload da imagem: ${error.message}`);
 
@@ -321,7 +376,9 @@ async function uploadImage(file) {
         return { url: publicURL.publicUrl, path: data.path };
 
     } catch (e) {
+        if (e instanceof Error) {
         throw new Error(`Erro ao fazer upload da imagem: ${e.message}`);
+        }
     }
 
 }

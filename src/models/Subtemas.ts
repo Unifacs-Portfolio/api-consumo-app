@@ -1,12 +1,29 @@
-import { supabase } from '../supabase/client.js';
+import { supabase } from '../supabase/client';
 
-class Subtema {
-  constructor(subtemas) {
+interface ErroSubtema {
+  subtema: string;
+  mensagem: string;
+}
+
+interface ResultadoValidacao {
+  subtemasNaoExistentes: string[]; 
+  subtemasExistentes: string[];
+  erros: ErroSubtema[];
+}
+
+class Subtema { 
+
+  // Definindo os atributos da classe
+  subtemas: string[];
+
+  // Construtor da classe
+  constructor(subtemas: string[]) {
     this.subtemas = Array.isArray(subtemas) ? subtemas : [];
   }
 
-  async validate() {
-    const resultado = {
+  // Método para validar os dados dos subtemas
+  async validate(): Promise<ResultadoValidacao> {
+    let resultado: ResultadoValidacao = {
       subtemasNaoExistentes: [],
       subtemasExistentes: [],
       erros: []
@@ -17,10 +34,10 @@ class Subtema {
     }
     
     for (let subtema of this.subtemas) {
-      const subtemaFormatado = subtema.trim(); 
+      let subtemaFormatado = subtema.trim(); 
 
       try {
-        const subtemaExiste = await this.verifyBd(subtemaFormatado);
+        let subtemaExiste = await this.verifyBd(subtemaFormatado);
 
         if (subtemaExiste) {
           resultado.subtemasExistentes.push(subtemaFormatado);
@@ -28,7 +45,7 @@ class Subtema {
           await this.createSubtema(subtemaFormatado);
           resultado.subtemasExistentes.push(subtemaFormatado); 
         }
-      } catch (e) {
+      } catch (e: any) {
         resultado.erros.push({ subtema: subtemaFormatado, mensagem: e.message });
       }
     }
@@ -36,9 +53,10 @@ class Subtema {
     return resultado;
   }
 
-  async verifyBd(subtema) {
+  // Método para verificar se o subtema já existe no banco de dados
+  async verifyBd(subtema: string): Promise<boolean> {
     try {
-      const { data: subtemaBd, error } = await supabase
+      let { data: subtemaBd, error } = await supabase
         .from('subTema')
         .select('descricao')
         .eq('descricao', subtema);
@@ -47,15 +65,16 @@ class Subtema {
         throw new Error(error.message);
       }
 
-      return subtemaBd && subtemaBd.length > 0;
+      return !!(subtemaBd && subtemaBd.length > 0); // Obs: Verificar se está retornando alguma confirmação
     } catch (e) {
       throw new Error('Erro ao verificar o subtema no banco de dados.');
     }
   }
 
-  async createSubtema(subtema) {
+  // Método para criar um novo subtema no banco de dados
+  async createSubtema(subtema: string): Promise<void> {
     try {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('subTema')
         .insert([{ descricao: subtema }]);
 

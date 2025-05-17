@@ -1,18 +1,23 @@
 
-import Dica from '../models/Dica.js';
-import { supabase } from '../supabase/client.js';
-import { TEMAS_VALIDOS } from '../utils/temas_validos.js';
-import Subtema from "../models/Subtemas.js";
+import Dica from '../models/Dica';
+import { supabase } from '../supabase/client';
+import { TEMAS_VALIDOS } from '../utils/temas_validos';
+import Subtema from "../models/Subtemas";
+import { Request, Response } from 'express';
+interface Correlacao {
+  subtema: string;
+  tema: string;
+}
 
 class DicaController {
 
-    async create(req, res) {
+    async create(req:Request, res:Response): Promise<void>{
         try {
             const dica = new Dica(req.body);
             const { valid, errors } = dica.validate();
-
-            if (!valid) return handleError(res, errors, 400, 'Dica Inválida');
-
+            
+            if (!valid)return handleError(res, errors ?.join(', ') || '', 400, 'Dica Inválida');
+            
             const tema = req.body.tema;
             const subtemas = req.body.subtemas
                 ? (Array.isArray(req.body.subtemas) ? req.body.subtemas : [req.body.subtemas])
@@ -60,7 +65,7 @@ class DicaController {
                 const resultadoSubtema = await subtemaObj.validate();
 
                 if (resultadoSubtema.erros.length > 0) {
-                    return handleError(res, resultadoSubtema.erros, 400, 'Erro ao processar subtemas');
+                    return handleError(res, resultadoSubtema.erros?.join(', ') || '', 400, 'Erro ao processar subtemas');
                 }
 
                 for (let subtema of subtemas) {
@@ -108,15 +113,19 @@ class DicaController {
                 if (correlacaoError) return handleError(res, correlacaoError.message, 500, correlacaoError.details);
             }
 
-            return res.status(201).json({ message: 'Dica criada com sucesso', data: dicaData[0] });
+            res.status(201).json({ message: 'Dica criada com sucesso', data: dicaData[0] });
+            return;
         } catch (e) {
+             if (e instanceof Error) {
             return handleError(res, e.message);
+             }
         }
     }
 
-    async getAll(_req, res) {
+    async getAll(_req:Request, res:Response): Promise<void>{
 
         try {
+            
             const { data: dicas, error } = await supabase
                 .from('dicas')
                 .select('*, correlacaoDicas(tema, subtema)')
@@ -127,7 +136,7 @@ class DicaController {
             const dicasComDetalhes = await Promise.all(dicas.map(async (dica) => {
                 const subtemas = new Set();
 
-                dica.correlacaoDicas?.forEach(correlacao => {
+                dica.correlacaoDicas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -146,14 +155,16 @@ class DicaController {
                 };
             }));
 
-            return res.json(dicasComDetalhes);
-
+             res.json(dicasComDetalhes);
+                return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async getByCode(req, res) {
+    async getByCode(req:Request, res:Response): Promise<void>{
         try {
             const { data: dica, error } = await supabase
                 .from('dicas')
@@ -165,11 +176,11 @@ class DicaController {
 
             const subtemas = new Set();
 
-            dica.correlacaoDicas?.forEach(correlacao => {
+            dica.correlacaoDicas?.forEach((correlacao: Correlacao)=> {
                 if (correlacao.subtema) subtemas.add(correlacao.subtema);
             });
 
-            return res.json({
+                res.json({
                 id: dica.id,
                 titulo: dica.titulo,
                 conteudo: dica.conteudo,
@@ -183,16 +194,18 @@ class DicaController {
             });
 
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async update(req, res) {
+    async update(req:Request, res:Response): Promise<void> {
         try {
             const updatedDica = new Dica(req.body);
             const { valid, errors } = updatedDica.validate();
 
-            if (!valid) return handleError(res, errors, 400, 'Essa dica não é válida');
+            if (!valid) return handleError(res, errors?.join(', ') || '', 400, 'Essa dica não é válida');
 
             const tema = req.body.tema;
             const subtemas = req.body.subtemas;
@@ -205,7 +218,7 @@ class DicaController {
             const resultadoSubtema = await subtemaObj.validate();
 
             if (resultadoSubtema.erros.length > 0) {
-                return handleError(res, resultadoSubtema.erros, 400, 'Erro ao processar subtemas');
+                return handleError(res, resultadoSubtema.erros?.join(', ') || '', 400, 'Erro ao processar subtemas');
             }
 
             const { data: dicaAtualizada, error: updateError } = await supabase
@@ -283,13 +296,16 @@ class DicaController {
                 }
             }
 
-            return res.status(200).json({ message: 'Dica e correlações atualizadas com sucesso', data: dicaAtualizada[0] });
+             res.status(200).json({ message: 'Dica e correlações atualizadas com sucesso', data: dicaAtualizada[0] });
+               return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async delete(req, res) {
+    async delete(req:Request, res:Response): Promise<void> {
         try {
             const dicaId = req.params.id;
 
@@ -307,13 +323,16 @@ class DicaController {
 
             if (deleteDicaError) return handleError(res, deleteDicaError.message, 500, deleteDicaError.details);
 
-            return res.status(204).end();
+             res.status(204).end();
+             return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async verify(req, res) {
+    async verify(req:Request, res:Response): Promise<void>{
         try {
             const verifyBy = req.body.verifyBy;
             const id = req.params.id;
@@ -322,7 +341,7 @@ class DicaController {
                 return handleError(res, `O campo 'verifyBy' é obrigátorio.`, 400, 'Input inválido');
             }
 
-            const { data: user, userError } = await supabase
+            const { data: user, error: userError } = await supabase
                 .from('usuarios')
                 .select('isMonitor')
                 .eq('email', verifyBy)
@@ -350,13 +369,16 @@ class DicaController {
 
             if (!dica) return handleError(res, `A dica com o código ${id} não foi encontrada.`, 404, 'Dica não encontrada');
 
-            return res.status(200).json({ message: `A dica com o código ${id} foi verificada com sucesso pelo usuário com o email ${verifyBy}.` });
+             res.status(200).json({ message: `A dica com o código ${id} foi verificada com sucesso pelo usuário com o email ${verifyBy}.` });
+               return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async getAllVerifiedByTheme(req, res) {
+    async getAllVerifiedByTheme(req:Request, res:Response): Promise<void> {
         try {
 
             const { tema } = req.params;
@@ -385,7 +407,7 @@ class DicaController {
             const dicasComDetalhes = await Promise.all(dicas.map(async (dica) => {
                 const subtemas = new Set();
 
-                dica.correlacaoDicas?.forEach(correlacao => {
+                dica.correlacaoDicas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -404,13 +426,16 @@ class DicaController {
                 };
             }));
 
-            return res.json(dicasComDetalhes);
+             res.json(dicasComDetalhes);
+              return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async getAllNotVerifiedByTheme(req, res) {
+    async getAllNotVerifiedByTheme(req:Request, res:Response): Promise<void> {
         try {
 
             const { tema } = req.params;
@@ -439,7 +464,7 @@ class DicaController {
             const dicasComDetalhes = await Promise.all(dicas.map(async (dica) => {
                 const subtemas = new Set();
 
-                dica.correlacaoDicas?.forEach(correlacao => {
+                dica.correlacaoDicas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -458,13 +483,16 @@ class DicaController {
                 };
             }));
 
-            return res.json(dicasComDetalhes);
+             res.json(dicasComDetalhes);
+
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async getAllByTheme(req, res) {
+    async getAllByTheme(req:Request, res:Response): Promise<void> {
         try {
 
             const { tema } = req.params;
@@ -492,7 +520,7 @@ class DicaController {
             const dicasComDetalhes = await Promise.all(dicas.map(async (dica) => {
                 const subtemas = new Set();
 
-                dica.correlacaoDicas?.forEach(correlacao => {
+                dica.correlacaoDicas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -511,13 +539,16 @@ class DicaController {
                 };
             }));
 
-            return res.json(dicasComDetalhes);
+             res.json(dicasComDetalhes);
+              return;
         } catch (e) {
+            if (e instanceof Error) {
             return handleError(res, e.message);
+            }
         }
     }
 
-    async getDica(req, res) {
+    async getDica(req:Request, res:Response): Promise<void> {
         try {
             const tema = req.params.tema;
             const subtemas = req.params.subtema.split(',');
@@ -533,17 +564,20 @@ class DicaController {
 
             if (correlacaoError) {
                 console.error('Erro ao buscar correlações:', correlacaoError);
-                return res.status(500).json({ error: `Erro ao buscar correlações de dicas: ${correlacaoError.message}` });
+                 res.status(500).json({ error: `Erro ao buscar correlações de dicas: ${correlacaoError.message}` });
+                 return;
             }
 
             if (!correlacoes || correlacoes.length === 0) {
-                return res.status(200).json([]);
+                 res.status(200).json([]);
+                 return;
             }
 
 
             const idsDicas = [...new Set(correlacoes.map(correlacao => correlacao.idDicas))];
             if (idsDicas.length === 0) {
-                return res.status(200).json([]);
+                 res.status(200).json([]);
+                 return;
             }
 
             const { data: dicas, error: dicasError } = await supabase
@@ -555,13 +589,14 @@ class DicaController {
 
             if (dicasError) {
                 console.error('Erro ao buscar dicas:', dicasError);
-                return res.status(500).json({ error: `Erro ao buscar as dicas: ${dicasError.message}` });
+                 res.status(500).json({ error: `Erro ao buscar as dicas: ${dicasError.message}` });
+                 return;
             }
 
             const dicasComDetalhes = await Promise.all(dicas.map(async (dica) => {
                 const subtemas = new Set();
 
-                dica.correlacaoDicas?.forEach(correlacao => {
+                dica.correlacaoDicas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -579,14 +614,18 @@ class DicaController {
                 };
             }));
 
-            return res.json(dicasComDetalhes);
+             res.json(dicasComDetalhes);
+             return;
         } catch (e) {
             console.error('Erro ao buscar dicas por subtemas:', e);
-            return res.status(500).json({ error: `Erro interno ao processar a solicitação: ${e.message}` });
+            if (e instanceof Error) {
+             res.status(500).json({ error: `Erro interno ao processar a solicitação: ${e.message}` });
+             return;
+            }
         }
     }
 
-    async getSpecialistsDica(req, res) {
+    async getSpecialistsDica(req:Request, res:Response): Promise<void> {
         try {
 
             const { tema } = req.params;
@@ -617,7 +656,7 @@ class DicaController {
             const dicasComDetalhes = await Promise.all(dicas.map(async (dica) => {
                 const subtemas = new Set();
 
-                dica.correlacaoDicas?.forEach(correlacao => {
+                dica.correlacaoDicas?.forEach((correlacao: Correlacao) => {
                     if (correlacao.subtema) subtemas.add(correlacao.subtema);
                 });
 
@@ -636,18 +675,23 @@ class DicaController {
                 };
             }));
 
-            return res.json(dicasComDetalhes);
+             res.json(dicasComDetalhes);
+             return;
         } catch (e) {
             console.error('Erro ao buscar dicas por subtemas:', e);
-            return res.status(500).json({ error: `Erro interno ao processar a solicitação: ${e.message}` });
+            if (e instanceof Error) {
+             res.status(500).json({ error: `Erro interno ao processar a solicitação: ${e.message}` });
+             return;
+            }
         }
     }
 }
 
-function handleError(res, detail = 'An error has occurred.', status = 500, message = 'Internal Server Error') {
+function handleError(res: Response, detail = 'An error has occurred.', status = 500, message = 'Internal Server Error') {
     console.log(`Error: ${message} - ${detail}`);
     if (!res.headersSent) {
-        return res.status(status).json({ message, detail });
+        res.status(status).json({ message, detail });
+        return;
     }
 }
 
