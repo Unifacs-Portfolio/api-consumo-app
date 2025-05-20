@@ -1,46 +1,47 @@
 {
-  "name": "api-app",
-  "version": "1.0.0",
-  "description": "Esta é uma API RESTful desenvolvida em Node.js utilizando o framework Express para gerenciar dados de cinco diferentes aplicativos: moda, culinária, engenharia, estética e veterinária. Esta API permite o cadastro de usuários, gerenciamento de postagens e integração entre os diferentes apps.",
-  "main": "src/app.js",
-  "directories": {
-    "doc": "docs"
-  },
-  "type": "module",
-  "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "dev": "nodemon src/app.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AAndreLuis-dev/api-app.git"
-  },
-  "author": "Andre Luis",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/AAndreLuis-dev/api-app/issues"
-  },
-  "homepage": "https://github.com/AAndreLuis-dev/api-app#readme",
-  "devDependencies": {
-    "express": "^4.21.1",
-    "jest": "^29.7.0",
-    "nodemon": "^3.1.7"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.45.6",
-    "@vercel/analytics": "^1.4.1",
-    "argon2": "^0.41.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.16",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^4.6.2",
-    "uuid": "^11.0.0"
-  },
-  "jest": {
-    "transform": {}
-  }
+	"name": "api-app",
+	"version": "1.0.0",
+	"description": "Esta é uma API RESTful desenvolvida em Node.js utilizando o framework Express para gerenciar dados de cinco diferentes aplicativos: moda, culinária, engenharia, estética e veterinária. Esta API permite o cadastro de usuários, gerenciamento de postagens e integração entre os diferentes apps.",
+	"main": "src/app.js",
+	"directories": {
+		"doc": "docs"
+	},
+	"type": "module",
+	"scripts": {
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+		"dev": "nodemon src/app.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AAndreLuis-dev/api-app.git"
+	},
+	"author": "Andre Luis",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/AAndreLuis-dev/api-app/issues"
+	},
+	"homepage": "https://github.com/AAndreLuis-dev/api-app#readme",
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"express": "^4.21.1",
+		"jest": "^29.7.0",
+		"nodemon": "^3.1.7"
+	},
+	"dependencies": {
+		"@supabase/supabase-js": "^2.45.6",
+		"@vercel/analytics": "^1.4.1",
+		"argon2": "^0.41.1",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"helmet": "^8.0.0",
+		"jsonwebtoken": "^9.0.2",
+		"multer": "^1.4.5-lts.1",
+		"nodemailer": "^6.9.16",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^4.6.2",
+		"uuid": "^11.0.0"
+	},
+	"jest": {
+		"transform": {}
+	}
 }
