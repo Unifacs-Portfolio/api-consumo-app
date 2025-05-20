@@ -1,33 +1,33 @@
-import express from 'express';
-import multer from 'multer';
-import ReceitaController from '../controllers/receitaController.js';
+import express from "express";
+import multer from "multer";
+import ReceitaController from "../controllers/receitaController.js";
 
 const router = express.Router();
 
 // Configuração do Multer
 const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB
-    }
+	storage: multer.memoryStorage(),
+	limits: {
+		fileSize: 5 * 1024 * 1024, // 5MB
+	},
 });
 
 // Middleware para processar form-data
 const processFormData = (req, res, next) => {
-    upload.array('files', 8)(req, res, function(err) {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).json({
-                message: 'Erro no upload',
-                detail: err.message
-            });
-        } else if (err) {
-            return res.status(500).json({
-                message: 'Erro',
-                detail: err.message
-            });
-        }
-        next();
-    });
+	upload.array("files", 8)(req, res, (err) => {
+		if (err instanceof multer.MulterError) {
+			return res.status(400).json({
+				message: "Erro no upload",
+				detail: err.message,
+			});
+		} else if (err) {
+			return res.status(500).json({
+				message: "Erro",
+				detail: err.message,
+			});
+		}
+		next();
+	});
 };
 
 // Rotas
@@ -75,7 +75,7 @@ const processFormData = (req, res, next) => {
  *       400:
  *         description: Erro ao criar a receita
  */
-router.post('/receitas', processFormData, ReceitaController.create);
+router.post("/receitas", processFormData, ReceitaController.create);
 
 /**
  * @swagger
@@ -89,7 +89,7 @@ router.post('/receitas', processFormData, ReceitaController.create);
  *       400:
  *         description: Erro ao listar as receitas
  */
-router.get('/receitas', ReceitaController.getAll);
+router.get("/receitas", ReceitaController.getAll);
 
 /**
  * @swagger
@@ -110,7 +110,7 @@ router.get('/receitas', ReceitaController.getAll);
  *       404:
  *         description: Receita não encontrada
  */
-router.get('/receitas/:id', ReceitaController.getById);
+router.get("/receitas/:id", ReceitaController.getById);
 
 /**
  * @swagger
@@ -156,7 +156,7 @@ router.get('/receitas/:id', ReceitaController.getById);
  *       404:
  *         description: Receita não encontrada
  */
-router.put('/receitas/:id', processFormData, ReceitaController.update);
+router.put("/receitas/:id", processFormData, ReceitaController.update);
 
 /**
  * @swagger
@@ -177,7 +177,7 @@ router.put('/receitas/:id', processFormData, ReceitaController.update);
  *       404:
  *         description: Receita não encontrada
  */
-router.delete('/receitas/:id', ReceitaController.delete);
+router.delete("/receitas/:id", ReceitaController.delete);
 
 /**
  * @swagger
@@ -200,7 +200,7 @@ router.delete('/receitas/:id', ReceitaController.delete);
  *       404:
  *         description: Receita não encontrada
  */
-router.patch('/receitas/:id/verificar', ReceitaController.verify);
+router.patch("/receitas/:id/verificar", ReceitaController.verify);
 
 /**
  * @swagger
@@ -221,7 +221,7 @@ router.patch('/receitas/:id/verificar', ReceitaController.verify);
  *       400:
  *         description: Erro ao listar receitas por tema
  */
-router.get('/:tema/receitas', ReceitaController.getAllByTheme);
+router.get("/:tema/receitas", ReceitaController.getAllByTheme);
 
 /**
  * @swagger
@@ -242,7 +242,10 @@ router.get('/:tema/receitas', ReceitaController.getAllByTheme);
  *       400:
  *         description: Erro ao listar receitas verificadas por tema
  */
-router.get('/:tema/receitas/verificadas', ReceitaController.getAllVerifiedByTheme);
+router.get(
+	"/:tema/receitas/verificadas",
+	ReceitaController.getAllVerifiedByTheme,
+);
 
 /**
  * @swagger
@@ -263,7 +266,10 @@ router.get('/:tema/receitas/verificadas', ReceitaController.getAllVerifiedByThem
  *       400:
  *         description: Erro ao listar receitas não verificadas por tema
  */
-router.get('/:tema/receitas/nao-verificadas', ReceitaController.getAllNotVerifiedByTheme);
+router.get(
+	"/:tema/receitas/nao-verificadas",
+	ReceitaController.getAllNotVerifiedByTheme,
+);
 
 /**
  * @swagger
@@ -290,6 +296,9 @@ router.get('/:tema/receitas/nao-verificadas', ReceitaController.getAllNotVerifie
  *       400:
  *         description: Erro ao listar receitas por tema e subtema
  */
-router.get('/receitas/:tema/:subtema', ReceitaController.getReceitasPorSubtemas);
+router.get(
+	"/receitas/:tema/:subtema",
+	ReceitaController.getReceitasPorSubtemas,
+);
 
 export default router;
