@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model correlacaodicas {
+  id                                       BigInt   @id
+  iddicas                                  BigInt?
+  subtema                                  String?
+  assunto                                  String?
+  dicas                                    dicas?   @relation(fields: [iddicas], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subtema_correlacaodicas_subtemaTosubtema subtema? @relation("correlacaodicas_subtemaTosubtema", fields: [subtema], references: [descricao], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model correlacaoreceitas {
+  id                                          BigInt    @id
+  idreceitas                                  BigInt?
+  subtema                                     String?
+  assunto                                     String?
+  receitas                                    receitas? @relation(fields: [idreceitas], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subtema_correlacaoreceitas_subtemaTosubtema subtema?  @relation("correlacaoreceitas_subtemaTosubtema", fields: [subtema], references: [descricao], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model dicas {
+  id              BigInt            @id
+  usuarioid       String?
+  conteudo        String?
+  isverify        Boolean?
+  verifyby        String?
+  datacriacao     DateTime?         @db.Timestamptz(6)
+  ultimaalteracao DateTime?         @db.Timestamptz(6)
+  correlacaodicas correlacaodicas[]
+  usuarios        usuarios?         @relation(fields: [usuarioid], references: [email], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model fotosreceitas {
+  idfoto    BigInt    @id
+  id        BigInt?
+  url       String?
+  createdat DateTime? @db.Timestamptz(6)
+  receitas  receitas? @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ingredientes {
+  idingrediente BigInt    @id
+  quantidade    String?
+  medida        String?
+  ingrediente   String?
+  postagemid    BigInt?
+  receitas      receitas? @relation(fields: [postagemid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model perguntaquiz {
+  id                 BigInt          @id
+  pergunta           String?
+  respostaverdadeira String?
+  respostasquiz      respostasquiz[]
+}
+
+model receitas {
+  id                 BigInt               @id
+  titulo             String?
+  conteudo           String?
+  isverify           Boolean?
+  idusuario          String?
+  verifyby           String?
+  datacriacao        DateTime?            @db.Timestamptz(6)
+  ultimaalteracao    DateTime?            @db.Timestamptz(6)
+  correlacaoreceitas correlacaoreceitas[]
+  fotosreceitas      fotosreceitas[]
+  ingredientes       ingredientes[]
+  usuarios           usuarios?            @relation(fields: [idusuario], references: [email], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model respostasquiz {
+  id           BigInt        @id
+  idpergunta   BigInt?
+  resposta     String?
+  perguntaquiz perguntaquiz? @relation(fields: [idpergunta], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model subtema {
+  id                                                     BigInt               @id
+  descricao                                              String?              @unique
+  correlacaodicas_correlacaodicas_subtemaTosubtema       correlacaodicas[]    @relation("correlacaodicas_subtemaTosubtema")
+  correlacaoreceitas_correlacaoreceitas_subtemaTosubtema correlacaoreceitas[] @relation("correlacaoreceitas_subtemaTosubtema")
+  temasubtema_temasubtema_subtemaTosubtema               temasubtema[]        @relation("temasubtema_subtemaTosubtema")
+}
+
+model tema {
+  id                                 BigInt        @id
+  descricao                          String?       @unique
+  temasubtema_temasubtema_temaTotema temasubtema[] @relation("temasubtema_temaTotema")
+}
+
+model temasubtema {
+  id                                   BigInt   @id
+  tema                                 String?
+  subtema                              String?
+  subtema_temasubtema_subtemaTosubtema subtema? @relation("temasubtema_subtemaTosubtema", fields: [subtema], references: [descricao], onDelete: NoAction, onUpdate: NoAction)
+  tema_temasubtema_temaTotema          tema?    @relation("temasubtema_temaTotema", fields: [tema], references: [descricao], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model usuarios {
+  email            String     @id
+  senha            String?
+  nome             String?
+  telefone         String?
+  nivelconsciencia BigInt?
+  ismonitor        Boolean?
+  tokens           String?
+  fotousu          String?
+  dicas            dicas[]
+  receitas         receitas[]
+}
