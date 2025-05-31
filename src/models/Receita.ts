@@ -1,5 +1,5 @@
 interface ReceitaInterface {
-    id: number;
+    id: string;
     titulo: string;
     conteudo: string;
     isVerify: boolean;
@@ -13,7 +13,7 @@ interface ReceitaInterface {
 class Receita {
 
     // Definição dos atributos da receita
-    id: number;
+    id: string;
     titulo: string;
     conteudo: string;
     isVerify: boolean;

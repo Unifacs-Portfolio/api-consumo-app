@@ -11,7 +11,7 @@ interface Correlacao {
 class ReceitaController {
 
     async create(req:Request, res:Response): Promise<void> {
-        let imageUrls = [];
+        const imageUrls = [];
         try {
             if (!req.body.titulo || !req.body.conteudo || !req.body.idUsuario || !req.body.tema || !req.body.subtema) {
                 throw new Error('Campos obrigatórios: titulo, conteudo, idUsuario, tema, subtema');

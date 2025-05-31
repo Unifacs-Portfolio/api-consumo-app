@@ -1,5 +1,4 @@
 import express from 'express';
-import type { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import swaggerJsDoc from 'swagger-jsdoc';
@@ -35,25 +34,17 @@ const CSS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-class App {
-    app:Application
-    constructor() {
-        this.app = express();
-        this.middlewares();
-        this.routes();
-        this.start();
-    }
+const app = express();
 
-    middlewares() {
-        this.app.use(cors());
-        this.app.use(helmet());
-        this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-        this.app.use(express.json({ limit: '50mb' }));
-        this.app.use(
-            '/api-docs',
-            swaggerUi.serve,
-            swaggerUi.setup(swaggerDocs, {
-                customCss: `
+app.use(cors());
+app.use(helmet());
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocs, {
+        customCss: `
                     .swagger-ui .opblock .opblock-summary-path-description-wrapper {
                         align-items: center;
                         display: flex;
@@ -63,25 +54,15 @@ class App {
                         width: 100%;
                     }
                 `,
-                customCssUrl: CSS_URL,
-            })
-        );
-    }
+        customCssUrl: CSS_URL,
+    })
+);
 
-    routes() {
-        this.app.use('/api', userRoutes);
-        this.app.use('/api', dicasRoutes);
-        this.app.use('/api', temaRoutes);
-        this.app.use('/api', receitaRoutes);
-        // this.app.use('/api', ingredientesRoutes);
-    }
 
-    start() {
-        const PORT = process.env.PORT || 3000;
-        this.app.listen(PORT, () => {
-            console.log(`Servidor rodando em: http://localhost:${PORT}`);
-        });
-    }
-}
+app.use('/api', userRoutes);
+app.use('/api', dicasRoutes);
+app.use('/api', temaRoutes);
+app.use('/api', receitaRoutes);
+// this.app.use('/api', ingredientesRoutes);
 
-export default new App().app;
+export { app }
