@@ -1,16 +1,20 @@
-import multer, { FileFilterCallback } from 'multer';
-import { Request } from 'express';
+import type { Request } from 'express'
+import multer, { type FileFilterCallback } from 'multer'
 
-let userStorage = multer.memoryStorage();
-let userUpload = multer({
+const userStorage = multer.memoryStorage()
+const userUpload = multer({
     storage: userStorage,
-    fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+    fileFilter: (
+        req: Request,
+        file: Express.Multer.File,
+        cb: FileFilterCallback,
+    ) => {
         if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
+            cb(null, true)
         } else {
-            cb(new Error('Somente arquivos de imagem são permitidos'));
+            cb(new Error('Somente arquivos de imagem são permitidos'))
         }
-    }
-}).single('Foto.usu');
+    },
+}).single('Foto.usu')
 
-export default userUpload;
+export default userUpload

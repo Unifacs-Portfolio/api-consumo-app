@@ -1,13 +1,13 @@
-import type { Request, Response, NextFunction } from 'express';
-import { Router } from 'express';
-import dicaController from '../controllers/dicaController'; 
-import authMiddleware from '../middlewares/authMiddleware';
-import multer from 'multer';
-import type { Multer } from 'multer';
+import type { NextFunction, Request, Response } from 'express'
+import { Router } from 'express'
+import multer from 'multer'
+import type { Multer } from 'multer'
+import dicaController from '../controllers/dicaController'
+import authMiddleware from '../middlewares/authMiddleware'
 
-const router: Router = Router();
+const router: Router = Router()
 // Configuração do Multer
-const upload: Multer = multer();
+const upload: Multer = multer()
 
 // Middleware para processar form-data
 const processFormData = (req: Request, res: Response, next: NextFunction) => {
@@ -15,18 +15,18 @@ const processFormData = (req: Request, res: Response, next: NextFunction) => {
         if (err instanceof multer.MulterError) {
             return res.status(400).json({
                 message: 'Erro',
-                detail: err.message
-            });
+                detail: err.message,
+            })
         }
         if (err) {
             return res.status(500).json({
                 message: 'Erro',
-                detail: (err as Error).message
-            });
+                detail: (err as Error).message,
+            })
         }
-        next();
-    });
-};
+        next()
+    })
+}
 
 /**
  * @swagger
@@ -40,7 +40,7 @@ const processFormData = (req: Request, res: Response, next: NextFunction) => {
  *       400:
  *         description: Erro ao listar as dicas
  */
-router.get('/dicas', dicaController.getAll);
+router.get('/dicas', dicaController.getAll)
 /**
  * @swagger
  * /api/dicas:
@@ -74,7 +74,7 @@ router.get('/dicas', dicaController.getAll);
  *       400:
  *         description: Erro ao criar a dica
  */
-router.post('/dicas', authMiddleware, processFormData, dicaController.create);
+router.post('/dicas', authMiddleware, processFormData, dicaController.create)
 
 /**
  * @swagger
@@ -118,7 +118,7 @@ router.post('/dicas', authMiddleware, processFormData, dicaController.create);
  *       404:
  *         description: Dica não encontrada
  */
-router.put('/dicas/:id', authMiddleware, processFormData, dicaController.update);
+router.put('/dicas/:id', authMiddleware, processFormData, dicaController.update)
 
 /**
  * @swagger
@@ -139,7 +139,7 @@ router.put('/dicas/:id', authMiddleware, processFormData, dicaController.update)
  *       404:
  *         description: Dica não encontrada
  */
-router.get('/dicas/:id', dicaController.getByCode);
+router.get('/dicas/:id', dicaController.getByCode)
 
 /**
  * @swagger
@@ -162,7 +162,7 @@ router.get('/dicas/:id', dicaController.getByCode);
  *       404:
  *         description: Dica não encontrada
  */
-router.delete('/dicas/:id', authMiddleware, dicaController.delete);
+router.delete('/dicas/:id', authMiddleware, dicaController.delete)
 
 /**
  * @swagger
@@ -187,7 +187,7 @@ router.delete('/dicas/:id', authMiddleware, dicaController.delete);
  *       404:
  *         description: Dica não encontrada
  */
-router.patch('/dicas/:id/verificar', authMiddleware, dicaController.verify);
+router.patch('/dicas/:id/verificar', authMiddleware, dicaController.verify)
 
 /**
  * @swagger
@@ -208,7 +208,7 @@ router.patch('/dicas/:id/verificar', authMiddleware, dicaController.verify);
  *       400:
  *         description: Erro ao listar dicas por tema
  */
-router.get('/:tema/dicas', dicaController.getAllByTheme);
+router.get('/:tema/dicas', dicaController.getAllByTheme)
 
 /**
  * @swagger
@@ -229,7 +229,7 @@ router.get('/:tema/dicas', dicaController.getAllByTheme);
  *       400:
  *         description: Erro ao listar dicas verificadas por tema
  */
-router.get('/:tema/dicas/verificadas', dicaController.getAllVerifiedByTheme);
+router.get('/:tema/dicas/verificadas', dicaController.getAllVerifiedByTheme)
 
 /**
  * @swagger
@@ -250,7 +250,10 @@ router.get('/:tema/dicas/verificadas', dicaController.getAllVerifiedByTheme);
  *       400:
  *         description: Erro ao listar dicas não verificadas por tema
  */
-router.get('/:tema/dicas/nao-verificadas', dicaController.getAllNotVerifiedByTheme);
+router.get(
+    '/:tema/dicas/nao-verificadas',
+    dicaController.getAllNotVerifiedByTheme,
+)
 
 /**
  * @swagger
@@ -277,11 +280,8 @@ router.get('/:tema/dicas/nao-verificadas', dicaController.getAllNotVerifiedByThe
  *       400:
  *         description: Erro ao listar dicas por tema e subtema
  */
-router.get('/dicas/:tema/:subtema', dicaController.getDica);
+router.get('/dicas/:tema/:subtema', dicaController.getDica)
 
-router.get('/:tema/dicas/especialistas', dicaController.getSpecialistsDica);
+router.get('/:tema/dicas/especialistas', dicaController.getSpecialistsDica)
 
-export default router;
-
-
-
+export default router

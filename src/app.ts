@@ -1,13 +1,13 @@
-import express from 'express';
-import type { Application } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import swaggerJsDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
-import userRoutes from './routes/userRoutes';
-import dicasRoutes from './routes/dicaRoutes';
-import temaRoutes from './routes/temaRoutes';
-import receitaRoutes from './routes/receitaRoutes';
+import cors from 'cors'
+import express from 'express'
+import type { Application } from 'express'
+import helmet from 'helmet'
+import swaggerJsDoc from 'swagger-jsdoc'
+import swaggerUi from 'swagger-ui-express'
+import dicasRoutes from './routes/dicaRoutes'
+import receitaRoutes from './routes/receitaRoutes'
+import temaRoutes from './routes/temaRoutes'
+import userRoutes from './routes/userRoutes'
 
 const swaggerOptions = {
     definition: {
@@ -15,7 +15,8 @@ const swaggerOptions = {
         info: {
             title: 'API APP',
             version: '1.0.0',
-            description: 'Documentação da API usada para o desenvolvimento dos aplicativos ecológicos',
+            description:
+                'Documentação da API usada para o desenvolvimento dos aplicativos ecológicos',
         },
         servers: [
             {
@@ -29,26 +30,27 @@ const swaggerOptions = {
         ],
     },
     apis: ['./src/routes/*.js'],
-};
+}
 
-const CSS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css';
+const CSS_URL =
+    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css'
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const swaggerDocs = swaggerJsDoc(swaggerOptions)
 
 class App {
-    app:Application
+    app: Application
     constructor() {
-        this.app = express();
-        this.middlewares();
-        this.routes();
-        this.start();
+        this.app = express()
+        this.middlewares()
+        this.routes()
+        this.start()
     }
 
     middlewares() {
-        this.app.use(cors());
-        this.app.use(helmet());
-        this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-        this.app.use(express.json({ limit: '50mb' }));
+        this.app.use(cors())
+        this.app.use(helmet())
+        this.app.use(express.urlencoded({ extended: true, limit: '50mb' }))
+        this.app.use(express.json({ limit: '50mb' }))
         this.app.use(
             '/api-docs',
             swaggerUi.serve,
@@ -64,24 +66,24 @@ class App {
                     }
                 `,
                 customCssUrl: CSS_URL,
-            })
-        );
+            }),
+        )
     }
 
     routes() {
-        this.app.use('/api', userRoutes);
-        this.app.use('/api', dicasRoutes);
-        this.app.use('/api', temaRoutes);
-        this.app.use('/api', receitaRoutes);
+        this.app.use('/api', userRoutes)
+        this.app.use('/api', dicasRoutes)
+        this.app.use('/api', temaRoutes)
+        this.app.use('/api', receitaRoutes)
         // this.app.use('/api', ingredientesRoutes);
     }
 
     start() {
-        const PORT = process.env.PORT || 3000;
+        const PORT = process.env.PORT || 3000
         this.app.listen(PORT, () => {
-            console.log(`Servidor rodando em: http://localhost:${PORT}`);
-        });
+            console.log(`Servidor rodando em: http://localhost:${PORT}`)
+        })
     }
 }
 
-export default new App().app;
+export default new App().app

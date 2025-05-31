@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/AAndreLuis-dev/api-app#readme",
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
     "@types/helmet": "^0.0.48",

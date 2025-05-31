@@ -1,53 +1,52 @@
-import { supabase } from '../supabase/client';
+import { supabase } from '../supabase/client'
 
 interface SubtemaInterface {
-    id: number;
-    descricao: string;
+    id: number
+    descricao: string
 }
 
 class Tema {
-
     // Definindo os atributos da classe
-    id: number;
-    descricao: string;
+    id: number
+    descricao: string
 
     // Construtor da classe
-    constructor({ id, descricao } : SubtemaInterface) {
-        this.id = id;
-        this.descricao = descricao;
+    constructor({ id, descricao }: SubtemaInterface) {
+        this.id = id
+        this.descricao = descricao
     }
 
     // Método para validar os dados do tema
     validate() {
-        const errors = [];
+        const errors = []
 
         if (!this.descricao || typeof this.descricao !== 'string') {
-            errors.push(`A descrição "${this.descricao}" não é válida.`);
+            errors.push(`A descrição "${this.descricao}" não é válida.`)
         }
 
         if (errors.length > 0) {
-            return { valid: false, errors };
+            return { valid: false, errors }
         }
 
-        return { valid: true };
+        return { valid: true }
     }
 
     async save(): Promise<SubtemaInterface> {
         const { data, error } = await supabase
             .from('tema')
             .insert([{ descricao: this.descricao }])
-            .select();
+            .select()
 
         if (error) {
-            throw new Error(`Erro ao salvar o tema: ${error.message}`);
+            throw new Error(`Erro ao salvar o tema: ${error.message}`)
         }
 
         // Verificação para garantir que data não é null ou vazio
         if (!data || data.length === 0) {
-            throw new Error('Nenhum dado retornado ao salvar o tema.');
+            throw new Error('Nenhum dado retornado ao salvar o tema.')
         }
 
-        return data[0];
+        return data[0]
     }
 
     static async findById(id: number) {
@@ -55,13 +54,13 @@ class Tema {
             .from('tema')
             .select('*')
             .eq('id', id)
-            .single();
+            .single()
 
         if (error) {
-            return null;
+            return null
         }
 
-        return data;
+        return data
     }
 
     static async deleteById(id: number) {
@@ -69,14 +68,14 @@ class Tema {
             .from('tema')
             .delete()
             .eq('id', id)
-            .select();
+            .select()
 
         if (error) {
-            throw new Error(`Erro ao deletar o tema: ${error.message}`);
+            throw new Error(`Erro ao deletar o tema: ${error.message}`)
         }
 
-        return data;
+        return data
     }
 }
 
-export default Tema;
+export default Tema
