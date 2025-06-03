@@ -14,22 +14,24 @@ Esta é uma API RESTful desenvolvida em Node.js utilizando o framework Express p
 ## Estrutura de Pastas
 
 ```bash
-api-app/
-│
-├── /src
-│   ├── /config            # Configurações da aplicação (como o banco de dados)
-│   ├── /controllers       # Lógica de controle das requisições
-│   ├── /models            # Definição dos modelos de dados (ORM)
-│   ├── /routes            # Definição das rotas da API
-│   ├── /middlewares       # Middlewares para validações e autenticação
-│   ├── /utils             # Funções utilitárias e helpers
-│   ├── /tests             # Testes unitários e de integração
-│   └── app.js             # Arquivo principal da aplicação
-├── /docs                  # Documentação da API (Swagger)
-├── .env                   # Variáveis de ambiente (senhas, chaves, etc.)
-├── .gitignore             # Arquivos e pastas ignorados pelo Git
-├── package.json           # Dependências e scripts npm
-└── README.md              # Documentação do projeto
+api-consumo-app/
+├── docs/             # Documentação da API (Swagger)
+├── migrations/       # Arquivos de migração do banco de dados
+├── src/
+│   ├── config/       # Configurações da aplicação (como o banco de dados)
+│   ├── controllers/  # Lógica de controle das requisições
+│   ├── models/       # Definição dos modelos de dados (ORM)
+│   ├── routes/       # Definição das rotas da API
+│   ├── middlewares/  # Middlewares para validações e autenticação
+│   ├── utils/        # Funções utilitárias e helpers
+│   ├── tests/        # Testes unitários e de integração
+│   └── app.js        # Arquivo principal da aplicação
+├── .env              # Variáveis de ambiente (senhas, chaves, etc.)
+├── .gitignore        # Arquivos e pastas ignorados pelo Git
+├── package.json      # Dependências e scripts npm
+├── package-lock.json # Lockfile do npm
+├── vercel.json       # Configuração para deploy na Vercel
+└── README.md         # Documentação do projeto
 ```
 
 ## Pré-requisitos
@@ -38,13 +40,14 @@ Antes de iniciar, certifique-se de ter o seguinte instalado:
 
 - Node.js (v14 ou superior)
 - npm ou yarn
+- PostgreSQL
 
 ## Instalação
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/AAndreLuis-dev/api-app
-cd api-app
+git clone https://github.com/Unifacs-Portfolio/api-consumo-app.git
+cd api-consumo-app
 ```
 
 2. Instale as dependências:
@@ -52,33 +55,85 @@ cd api-app
 npm install
 ```
 
-## Executando a Aplicação
+3. Configure as variáveis de ambiente:
+Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
+```env
+PORT=3000
+DATABASE_URL=postgres://usuario:senha@localhost:5432/nome_do_banco
+JWT_SECRET=sua_chave_secreta
+```
+
+4. Execute as migrações do banco de dados:
+```bash
+npx sequelize db:migrate
+```
+
+5. Inicie a aplicação:
 ```bash
 npm run dev
 ```
+A aplicação estará disponível em http://localhost:3000.
+
 ## Rotas da API
 
 ### Autenticação
+Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O fluxo básico é:
 
-- POST /auth/register: Cadastro de novos usuários.
-- POST /auth/login: Autenticação de usuários e obtenção de token JWT.
+1. Registro de Usuário:
+-Endpoint: POST /auth/register
+-Descrição: Cadastra um novo usuário.
+-Exemplo de corpo da requisição:
+```json
+{
+  "nome": "João",
+  "email": "joao@example.com",
+  "senha": "123456"
+}
+```
 
-### Usuários
-- GET /users : Lista todos os usuários.
-- GET /users/ : Retorna detalhes de um usuário específico.
-- PUT /users/ : Atualiza informações de um usuário.
-- DELETE /users/:  Remove um usuário.
+2. Login de Usuário:
+-Endpoint: POST /auth/login
+-Descrição: Autentica o usuário e retorna um token JWT.
+-Exemplo de corpo da requisição:
+```json
+{
+  "email": "joao@example.com",
+  "senha": "123456"
+}
+```
+-Exemplo de resposta:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
 
-### Postagens
-- GET /posts: Lista todas as postagens.
-- POST /posts: Cria uma nova postagem.
-- PUT /posts/: Atualiza uma postagem.
-- DELETE /posts/ : Remove uma postagem.
+3. Como usar o token:
+Inclua o token no header das requisições protegidas:
+```makefile
+Authorization: Bearer SEU_TOKEN_AQUI
+```
 
+Exemplo com curl:
+```bash
+curl -H "Authorization: Bearer SEU_TOKEN_AQUI" http://localhost:3000/users
+```
 
-### Dicas, Ingredientes e Temas 
+4. Endpoints protegidos (requere token JWT)
+4.1 Usuários
+-GET /users — Lista todos os usuários
+-GET /users/:id — Retorna dados de um usuário específico
+-PUT /users/:id — Atualiza os dados de um usuário
+-DELETE /users/:id — Remove um usuário
 
-Rotas similares para dicas, ingredientes e temas, conforme a estrutura do projeto.
+4.2 Postagens
+-GET /posts — Lista todas as postagens
+-POST /posts — Cria nova postagem
+-PUT /posts/:id — Atualiza uma postagem
+-DELETE /posts/:id — Deleta uma postagem
+
+5. Dicas, Ingredientes e Temas
+Rotas seguem o mesmo padrão de CRUD (GET, POST, PUT, DELETE) e estão organizadas por categoria (moda, culinária, estética, etc), conforme o escopo do projeto.
 
 ## Teste
 ```bash
@@ -89,7 +144,7 @@ npm test
 
 A documentação da API é gerada automaticamente utilizando o Swagger. Após iniciar o servidor, acesse a documentação via:
 
-http://localhost:3000/api-docs
+http://localhost:3000/docs
 
 
 ## Contribuição
