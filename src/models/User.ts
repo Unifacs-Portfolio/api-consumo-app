@@ -9,18 +9,6 @@ interface UserInterface {
     telefone: string;
     nivelConsciencia: string;
     isMonitor: boolean;
-    fotoUsu: string;
-}
-
-interface SaveResponse {
-    id: number;
-    email: string;
-    tokens: string;
-    senha: string;
-    nome: string;
-    telefone: string;
-    ni_conciencia: string;
-    is_monitor: boolean;
     foto_usuario: string;
 }
 
@@ -34,10 +22,10 @@ class User {
     telefone: string;
     nivelConsciencia: string;
     isMonitor: boolean;
-    fotoUsu: string;
+    foto_usuario: string;
 
     // Construtor da classe
-    constructor({ email, tokens, senha, nome, telefone, nivelConsciencia, isMonitor, fotoUsu } : UserInterface) {
+    constructor({ email, tokens, senha, nome, telefone, nivelConsciencia, isMonitor, foto_usuario } : UserInterface) {
         this.email = email;
         this.tokens = tokens;
         this.senha = senha;
@@ -45,7 +33,7 @@ class User {
         this.telefone = telefone;
         this.nivelConsciencia = nivelConsciencia;
         this.isMonitor = isMonitor;
-        this.fotoUsu = fotoUsu;
+        this.foto_usuario = foto_usuario;
     }
 
     validate() {
@@ -101,7 +89,7 @@ class User {
                     telefone: this.telefone,
                     ni_conciencia: this.nivelConsciencia,
                     is_monitor: this.isMonitor,
-                    foto_usuario: this.fotoUsu,
+                    foto_usuario: this.foto_usuario,
                 },
             ])
             .select();
