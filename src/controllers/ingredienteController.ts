@@ -5,7 +5,7 @@ import { Request, Response } from 'express';
 
 class IngredienteController {
 
-    async store(req: Request, res: Response) {
+    store = async (req: Request, res: Response) => {
         try {
             const ingrediente = new Ingrediente(req.body);
 
@@ -28,7 +28,7 @@ class IngredienteController {
         }
     }
 
-    async index(req: Request, res: Response) {
+     listAll = async (req: Request, res: Response) => {
         try {
             /* const { data: ingredientes, error } = await supabase
                 .from('ingredientes')
@@ -49,7 +49,7 @@ class IngredienteController {
     }
 
 
-    async show(req: Request, res: Response) {
+    show = async (req: Request, res: Response) => {
         try {
             /* const { data: ingrediente, error } = await supabase
                 .from('ingredientes')
@@ -70,7 +70,7 @@ class IngredienteController {
         }
     }
 
-    async update(req: Request, res: Response) {
+    update = async (req: Request, res: Response) => {
         try {
             const updateIngrediente = new Ingrediente(req.body);
 
@@ -110,7 +110,7 @@ class IngredienteController {
         }
     }
 
-    async delete(req: Request, res: Response) {
+    delete = async (req: Request, res: Response) => {
         try {
             /* const { data, error: deleteError } = await supabase
                 .from('ingredientes')
@@ -137,4 +137,4 @@ function handleError(res: Response, detail = 'An error has occurred.', status = 
     }
 }
 
-export default new IngredienteController(); 
+export const ingredienteController = new IngredienteController(); 
