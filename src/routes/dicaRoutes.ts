@@ -279,6 +279,44 @@ router.get('/:tema/dicas/nao-verificadas', dicaController.getAllNotVerifiedByThe
  */
 router.get('/dicas/:tema/:subtema', dicaController.getDica);
 
+/**
+ * @swagger
+ * /api/{tema}/dicas/especialistas:
+ *   get:
+ *     summary: Lista dicas de especialistas por tema
+ *     tags: [Dicas]
+ *     parameters:
+ *       - in: path
+ *         name: tema
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tema da dica
+ *     responses:
+ *       200:
+ *         description: Lista de dicas de especialistas por tema
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 # TODO: Defina aqui as propriedades de uma Dica
+ *                 # Exemplo:
+ *                 # properties:
+ *                 #   id: 
+ *                 #     type: integer
+ *                 #   titulo:
+ *                 #     type: string
+ *       400:
+ *         description: Erro ao listar dicas de especialistas
+ *       500:
+ *         description: Erro interno do servidor
+ *       500:
+ *         description: Erro interno do servidor
+ */
+
+
 router.get('/:tema/dicas/especialistas', dicaController.getSpecialistsDica);
 
 export default router;
