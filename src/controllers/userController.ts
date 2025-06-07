@@ -8,11 +8,9 @@ import type { Request, Response } from 'express';
 import { error } from 'console';
 import { PrismaUsuarioRepository } from '../repositories/prisma/PrismaUsuarioRepository';
 
-class UserController {
+    const userPrismaRepository = new PrismaUsuarioRepository();
 
-    private userPrismaRepository = new PrismaUsuarioRepository();
-
-    async store(req:Request, res:Response): Promise<void>{
+    export async function storeUser(req:Request, res:Response): Promise<void> {
         let uploadedImagePath = null;
         try {
             const user = new User({
@@ -51,7 +49,7 @@ class UserController {
             // O hash da senha é gerado aqui
             const hashedPassword = await argon2.hash(user.senha);
 
-            await this.userPrismaRepository.create({
+            await userPrismaRepository.create({
                 email: user.email,
                 senha: hashedPassword,
                 nome: user.nome,
@@ -79,7 +77,7 @@ class UserController {
     }
 
     //funcionando pos alteracao bd
-    async index(req:Request, res:Response): Promise<void> {
+    export async function indexUser(req:Request, res:Response): Promise<void> {
         try {
             /*const { data: users, error } = await supabase
                 .from('usuarios')
@@ -90,7 +88,7 @@ class UserController {
              res.json(users);
              return;*/
 
-             const users = await this.userPrismaRepository.findAll();
+             const users = await userPrismaRepository.findAll();
 
              const sanitizedUsers = users.map(user =>({
                 email: user.email,
@@ -110,7 +108,7 @@ class UserController {
         }
     }
     //funcionando pos alteracao bd
-    async show(req:Request, res:Response): Promise<void> {
+    export async function showUser(req:Request, res:Response): Promise<void> {
         try {
             /*const { data: user, error } = await supabase
                 .from('usuarios')
@@ -125,8 +123,7 @@ class UserController {
 
              res.json(user);
              return;*/
-
-              const user = await this.userPrismaRepository.findByEmail({ email: req.params.email });
+              const user = await userPrismaRepository.findByEmail({ email: req.params.email });
 
                 if (!user) {
                     res.status(404).json({ errors: ['Usuário não encontrado'] });
@@ -150,7 +147,7 @@ class UserController {
         }
     }
     //Funcionando pos alteracao
-    async update(req:Request, res:Response): Promise<void> {
+    export async function updateUser(req:Request, res:Response): Promise<void> {
 
         let uploadedImagePath = null;
 
@@ -198,8 +195,9 @@ class UserController {
     
             res.json({ message: 'Usuário atualizado com sucesso' });
             return;*/
+            const userEmail = req.params.email;
 
-            const user = await this.userPrismaRepository.findByEmail({ email: req.params.email });
+            const user = await userPrismaRepository.findByEmail({ email: userEmail });
 
             if (!user) {
                 res.status(400).json({ errors: ['Usuário não encontrado'] });
@@ -219,13 +217,13 @@ class UserController {
                 uploadedImagePath = uploadResult.path;
             }
 
-            const updatedData = { ...req.body, foto_usuario: fotoUsuarioURL }; // usa o operador spread (...) para copiar todas as propriedades de req.body
+            const updatedData = { email: userEmail, ...req.body, foto_usuario: fotoUsuarioURL }; // usa o operador spread (...) para copiar todas as propriedades de req.body
 
             if (req.body.senha) {
                 updatedData.senha = await argon2.hash(req.body.senha.trim());
             }
 
-            await this.userPrismaRepository.updateOne(updatedData);
+            await userPrismaRepository.updateOne(updatedData);
 
             res.json({ message: 'Usuário atualizado com sucesso' });
     
@@ -245,7 +243,7 @@ class UserController {
     }
         
     // Funcionando pos alteracao
-    async delete(req:Request, res:Response): Promise<void> {
+    export async function deleteUser(req:Request, res:Response): Promise<void> {
         try {
             /*const { data: user, error: fetchError } = await supabase
                 .from('usuarios')
@@ -267,15 +265,14 @@ class UserController {
 
              res.json({ message: 'Usuário deletado com sucesso' });
              return;*/
-
-             const user = await this.userPrismaRepository.findByEmail({email: req.params.email});
+             const user = await userPrismaRepository.findByEmail({email: req.params.email});
 
              if(!user){
                 res.status(400).json({errors: ['Usuário não encontrado']});
                 return;
              }
 
-             await this.userPrismaRepository.delete({email: req.params.email});
+             await userPrismaRepository.delete({email: req.params.email});
 
              res.json({message: 'Usuário deletado com sucesso'});
 
@@ -287,11 +284,11 @@ class UserController {
         }
     }
 
-    async loginUser(req:Request, res:Response): Promise<void> {
+    export async function loginUser(req:Request, res:Response): Promise<void> {
         const { email, senha } = req.body;
     
         try {
-            console.log("Iniciando login para o email:", email);
+            //console.log("Iniciando login para o email:", email);
     
             /*const { data: user, error } = await supabase
                 .from('usuarios')
@@ -331,8 +328,7 @@ class UserController {
     
              res.status(200).json({ message: 'Login bem-sucedido', token });
              return;*/
-
-             const user = await this.userPrismaRepository.findByEmail({email});
+             const user = await userPrismaRepository.findByEmail({email});
 
              if(!user){
                 res.status(400).json({error: 'Usuário não encontrado'});
@@ -366,7 +362,7 @@ class UserController {
         }
     }
     
-    async resetPasswordRequest(req:Request, res:Response): Promise<void> {
+    export async function resetPasswordRequestUser(req:Request, res:Response): Promise<void> {
         const { email } = req.body;
 
         try {
@@ -407,13 +403,15 @@ class UserController {
 
             res.status(200).json({ message: 'Token de redefinição de senha enviado com sucesso' });
             return;*/
+            const user = await userPrismaRepository.findByEmail({ email });
 
-            const user = await this.userPrismaRepository.findByEmail({ email });
 
             if (!user) {
                 res.status(400).json({ error: 'Usuário não encontrado' });
                 return;
             }
+
+            //console.log('chegou aq2');
 
             const token = jwt.sign(
                 { email: user.email },
@@ -421,13 +419,18 @@ class UserController {
                 { expiresIn: '1h' }
             );
 
+
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
                 auth: {
                     user: process.env.EMAIL_USER,
                     pass: process.env.EMAIL_PASS
                 }
             });
+
 
             const mailOptions = {
                 from: process.env.EMAIL_USER,
@@ -436,7 +439,9 @@ class UserController {
                 html: `<p>Seu token de redefinição de senha é:</p><p><strong>${token}</strong></p>`
             };
 
+
             await transporter.sendMail(mailOptions);
+
 
             res.status(200).json({ message: 'Token de redefinição de senha enviado com sucesso' });
         } catch (e) {
@@ -446,7 +451,7 @@ class UserController {
         }
     }
 
-    async resetPassword(req:Request, res:Response): Promise<void> {
+    export async function resetPasswordUser(req:Request, res:Response): Promise<void> {
     
         const { token } = req.params;
         const { newPassword } = req.body;
@@ -457,7 +462,7 @@ class UserController {
 
             const hashedPassword = await argon2.hash(newPassword);
 
-            await this.userPrismaRepository.updatePasswordByEmail(email, hashedPassword);
+            await userPrismaRepository.updatePasswordByEmail(email, hashedPassword);
 
             res.status(200).json({ message: 'Senha atualizada com sucesso' });
             return;
@@ -495,7 +500,6 @@ class UserController {
         }
     }
 
-}
     async function uploadImage(file: Express.Multer.File) { 
         try {
             const uniqueFileName = `${uuidv4()}-${file.originalname}`;
@@ -520,5 +524,3 @@ class UserController {
         }
 
     }
-
-export default new UserController();

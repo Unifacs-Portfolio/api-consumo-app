@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import userController from '../controllers/userController';
+import { storeUser, deleteUser, indexUser, loginUser, resetPasswordRequestUser, resetPasswordUser, showUser, updateUser } from '../controllers/userController';
 import userUpload from "../middlewares/uploadMiddleware"; 
 import authMiddleware from "../middlewares/authMiddleware"; 
  
 const router: Router = Router();
+
 
 /**
  * @swagger
@@ -43,7 +44,7 @@ const router: Router = Router();
  *       400:
  *         description: Erro na criação do usuário
  */
-router.post('/usuario', userUpload.single('fotoUsu'), userController.store);
+router.post('/usuario', userUpload.single('fotoUsu'), storeUser);
 
 /**
  * @swagger
@@ -72,7 +73,7 @@ router.post('/usuario', userUpload.single('fotoUsu'), userController.store);
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/usuario/login', userController.loginUser);
+router.post('/usuario/login', loginUser);
 
 /**
  * @swagger
@@ -101,7 +102,7 @@ router.post('/usuario/login', userController.loginUser);
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/usuario/reset', userController.resetPasswordRequest);
+router.post('/usuario/reset', resetPasswordRequestUser);
 
 /**
  * @swagger
@@ -135,7 +136,7 @@ router.post('/usuario/reset', userController.resetPasswordRequest);
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/usuario/reset/:token', userController.resetPassword);
+router.post('/usuario/reset/:token', resetPasswordUser);
 
 /**
  * @swagger
@@ -151,7 +152,7 @@ router.post('/usuario/reset/:token', userController.resetPassword);
  *       400:
  *         description: Erro ao buscar usuários
  */
-router.get('/usuario', authMiddleware, userController.index);
+router.get('/usuario', authMiddleware, indexUser);
 
 /**
  * @swagger
@@ -174,7 +175,7 @@ router.get('/usuario', authMiddleware, userController.index);
  *       404:
  *         description: Usuário não encontrado
  */
-router.get('/usuario/:email', authMiddleware, userController.show);
+router.get('/usuario/:email', authMiddleware, showUser);
 
 /**
  * @swagger
@@ -221,7 +222,7 @@ router.get('/usuario/:email', authMiddleware, userController.show);
  *       404:
  *         description: Usuário não encontrado
  */
-router.put('/usuario/:email', authMiddleware, userUpload.single('fotoUsu'), userController.update);
+router.put('/usuario/:email', authMiddleware, userUpload.single('fotoUsu'), updateUser);
 
 /**
  * @swagger
@@ -246,6 +247,6 @@ router.put('/usuario/:email', authMiddleware, userUpload.single('fotoUsu'), user
  *       400:
  *         description: Erro ao deletar o usuário
  */
-router.delete('/usuario/:email', authMiddleware, userController.delete);
+router.delete('/usuario/:email', authMiddleware, deleteUser);
 
 export default router;
