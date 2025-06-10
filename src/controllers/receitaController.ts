@@ -1212,7 +1212,7 @@ class ReceitaController {
     }
 }
 
-function handleError(res:Response, detail = 'Ocorreu um erro.', status = 500, DetaInter?: string): never {
+function handleError(res:Response, detail = 'Ocorreu um erro.', status = 500, DetaInter?: string): void {
     console.error('Erro:',  DetaInter || detail);
     if (!res.headersSent) {
         res.status(status).json({
@@ -1220,7 +1220,6 @@ function handleError(res:Response, detail = 'Ocorreu um erro.', status = 500, De
             detail
         });
     }
-    throw new Error(detail);
 }
 
 export default new ReceitaController();
