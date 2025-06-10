@@ -7,9 +7,9 @@ interface UserInterface {
     senha: string;
     nome: string;
     telefone: string;
-    nivelConsciencia: number;
+    nivelConsciencia: string;
     isMonitor: boolean;
-    fotoUsu: string | null;
+    fotoUsu: string;
 }
 
 interface SaveResponse {
@@ -19,7 +19,7 @@ interface SaveResponse {
     senha: string;
     nome: string;
     telefone: string;
-    ni_conciencia: number;
+    ni_conciencia: string;
     is_monitor: boolean;
     foto_usuario: string;
 }
@@ -32,9 +32,9 @@ class User {
     senha: string;
     nome: string;
     telefone: string;
-    nivelConsciencia: number;
+    nivelConsciencia: string;
     isMonitor: boolean;
-    fotoUsu: string | null;
+    fotoUsu: string;
 
     // Construtor da classe
     constructor({ email, tokens, senha, nome, telefone, nivelConsciencia, isMonitor, fotoUsu } : UserInterface) {
@@ -73,7 +73,8 @@ class User {
             errors.push('A senha precisa ter entre 6 e 255 caracteres.');
         }
 
-        if (this.nivelConsciencia < 0 || this.nivelConsciencia > 5) { // Validação do nível de conscientização
+        const nivelConscienciaNum = Number(this.nivelConsciencia);
+        if (Number.isNaN(nivelConscienciaNum) || nivelConscienciaNum < 0 || nivelConscienciaNum > 5) { // Validação do nível de conscientização
             errors.push('Nível de conscientização deve ser um número entre 0 e 5.');
         }
 
