@@ -10,6 +10,7 @@ import receitaRoutes from './routes/receitaRoutes';
 import ingredientesRoutes from './routes/ingredienteRoutes';
 import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
+import quizRoutes from './routes/quizRoutes';
 
 const swaggerOptions = {
     definition: {
@@ -76,6 +77,7 @@ app.use('/api', dicasRoutes);
 app.use('/api', temaRoutes);
 app.use('/api', receitaRoutes);
 app.use('/api', ingredientesRoutes);
+app.use('/api', quizRoutes);
 
 app.use(<ErrorRequestHandler>((err, _req, res, _next) => {
     console.error(err)
