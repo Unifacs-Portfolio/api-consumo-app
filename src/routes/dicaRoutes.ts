@@ -1,6 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
-import dicaController from '../controllers/dicaController'; 
+import {
+    create, deletar, getAll,
+    getAllByTheme, getAllNotVerifiedByTheme,
+    getAllVerifiedByTheme, getByCode, getDicaByTemaAndSubtema,
+    getSpecialistsDica, update, verify
+} from '../controllers/dicaController';
 import authMiddleware from '../middlewares/authMiddleware';
 import multer from 'multer';
 import type { Multer } from 'multer';
@@ -39,8 +44,11 @@ const processFormData = (req: Request, res: Response, next: NextFunction) => {
  *         description: Lista de dicas
  *       400:
  *         description: Erro ao listar as dicas
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/dicas', dicaController.getAll);
+router.get('/dicas', getAll);
+
 /**
  * @swagger
  * /api/dicas:
@@ -56,12 +64,15 @@ router.get('/dicas', dicaController.getAll);
  *           schema:
  *             type: object
  *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email do usuário que cria a dica
+ *               conteudo:
+ *                 type: string
+ *                 description: Conteúdo da dica
  *               titulo:
  *                 type: string
  *                 description: Título da dica
- *               descricao:
- *                 type: string
- *                 description: Descrição detalhada da dica
  *               tema:
  *                 type: string
  *                 description: Tema relacionado à dica
@@ -72,9 +83,13 @@ router.get('/dicas', dicaController.getAll);
  *       201:
  *         description: Dica criada com sucesso
  *       400:
- *         description: Erro ao criar a dica
+ *         description: Erro ao criar a dica ou o subtema não pertence ao tema
+ *       404:
+ *        description: O usuário com o email fornecido não foi encontrado ou o tema com o ID fornecido não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.post('/dicas', authMiddleware, processFormData, dicaController.create);
+router.post('/dicas', authMiddleware, processFormData, create);
 
 /**
  * @swagger
@@ -98,12 +113,12 @@ router.post('/dicas', authMiddleware, processFormData, dicaController.create);
  *           schema:
  *             type: object
  *             properties:
+ *               conteudo:
+ *                 type: string
+ *                 description: Conteúdo da dica
  *               titulo:
  *                 type: string
  *                 description: Título da dica
- *               descricao:
- *                 type: string
- *                 description: Descrição detalhada da dica
  *               tema:
  *                 type: string
  *                 description: Tema relacionado à dica
@@ -116,9 +131,11 @@ router.post('/dicas', authMiddleware, processFormData, dicaController.create);
  *       400:
  *         description: Erro ao atualizar a dica
  *       404:
- *         description: Dica não encontrada
+ *         description: A dica com o ID fornecido não foi encontrada ou o tema com o ID fornecido não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.put('/dicas/:id', authMiddleware, processFormData, dicaController.update);
+router.put('/dicas/:id', authMiddleware, processFormData, update);
 
 /**
  * @swagger
@@ -136,10 +153,14 @@ router.put('/dicas/:id', authMiddleware, processFormData, dicaController.update)
  *     responses:
  *       200:
  *         description: Detalhes da dica
+ *       400:
+ *         description: Erro ao buscar a dica
  *       404:
- *         description: Dica não encontrada
+ *         description: A dica com o ID fornecido não foi encontrada ou o tema com o ID fornecido não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/dicas/:id', dicaController.getByCode);
+router.get('/dicas/:id', getByCode);
 
 /**
  * @swagger
@@ -157,12 +178,16 @@ router.get('/dicas/:id', dicaController.getByCode);
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
+ *       204:
  *         description: Dica deletada com sucesso
+ *       400:
+ *         description: Erro ao deletar a dica
  *       404:
- *         description: Dica não encontrada
+ *         description: A dica com o ID fornecido não foi encontrada
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.delete('/dicas/:id', authMiddleware, dicaController.delete);
+router.delete('/dicas/:id', authMiddleware, deletar);
 
 /**
  * @swagger
@@ -179,15 +204,30 @@ router.delete('/dicas/:id', authMiddleware, dicaController.delete);
  *         description: ID da dica
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               verifyBy:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Dica verificada com sucesso
  *       400:
  *         description: Erro ao verificar a dica
+ *       401:
+ *         description: Acesso não autorizado
+ *       403:
+ *         description: O usuário não tem permissão para verificar a dica
  *       404:
- *         description: Dica não encontrada
+ *         description: O usuário com o email fornecido não foi encontrado ou a dica com o ID fornecido não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.patch('/dicas/:id/verificar', authMiddleware, dicaController.verify);
+router.patch('/dicas/:id/verificar', authMiddleware, verify);
 
 /**
  * @swagger
@@ -207,8 +247,12 @@ router.patch('/dicas/:id/verificar', authMiddleware, dicaController.verify);
  *         description: Lista de dicas por tema
  *       400:
  *         description: Erro ao listar dicas por tema
+ *       404:
+ *         description: O tema não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/:tema/dicas', dicaController.getAllByTheme);
+router.get('/:tema/dicas', getAllByTheme);
 
 /**
  * @swagger
@@ -228,8 +272,12 @@ router.get('/:tema/dicas', dicaController.getAllByTheme);
  *         description: Lista de dicas verificadas por tema
  *       400:
  *         description: Erro ao listar dicas verificadas por tema
+ *       404: 
+ *         description: O tema não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/:tema/dicas/verificadas', dicaController.getAllVerifiedByTheme);
+router.get('/:tema/dicas/verificadas', getAllVerifiedByTheme);
 
 /**
  * @swagger
@@ -249,8 +297,12 @@ router.get('/:tema/dicas/verificadas', dicaController.getAllVerifiedByTheme);
  *         description: Lista de dicas não verificadas por tema
  *       400:
  *         description: Erro ao listar dicas não verificadas por tema
+ *       404:
+ *         description: O tema não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/:tema/dicas/nao-verificadas', dicaController.getAllNotVerifiedByTheme);
+router.get('/:tema/dicas/nao-verificadas', getAllNotVerifiedByTheme);
 
 /**
  * @swagger
@@ -276,12 +328,36 @@ router.get('/:tema/dicas/nao-verificadas', dicaController.getAllNotVerifiedByThe
  *         description: Lista de dicas por tema e subtema
  *       400:
  *         description: Erro ao listar dicas por tema e subtema
+ *       404:
+ *         description: O tema ou subtema não existe
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/dicas/:tema/:subtema', dicaController.getDica);
+router.get('/dicas/:tema/:subtema', getDicaByTemaAndSubtema);
 
-router.get('/:tema/dicas/especialistas', dicaController.getSpecialistsDica);
+/**
+ * @swagger
+ * /api/{tema}/dicas/especialistas:
+ *   get:
+ *     summary: Lista dicas de especialistas por tema
+ *     tags: [Dicas]
+ *     parameters:
+ *       - in: path
+ *         name: tema
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tema da dica
+ *     responses:
+ *       200:
+ *         description: Lista de dicas de especialistas por tema
+ *       400:
+ *         description: Erro ao listar dicas de especialistas
+ *       404:
+ *         description: O tema não existe
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.get('/:tema/dicas/especialistas', getSpecialistsDica);
 
 export default router;
-
-
-
