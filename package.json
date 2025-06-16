@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/AAndreLuis-dev/api-app#readme",
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
     "@types/helmet": "^0.0.48",
@@ -54,7 +55,8 @@
     "nodemailer": "^6.9.16",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.2",
-    "uuid": "^11.0.0"
+    "uuid": "^11.0.0",
+    "zod": "^3.25.62"
   },
   "jest": {
     "transform": {}

@@ -1,37 +1,50 @@
-import { PrismaClient, subtemas, temas } from "../../../generated/prisma/client";
-import { TemaRepository } from "../TemaRepository";
+import type {
+    Prisma,
+    PrismaClient,
+    subtemas,
+    temas,
+} from '../../../generated/prisma/client'
+import type { TemaRepository } from '../TemaRepository'
+import { prisma } from '../../db'
 
 export class PrismaTemaRepository implements TemaRepository {
-    private prisma: PrismaClient;
+    private prisma: PrismaClient
 
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma
     }
-    getSubtemasByTema({ temaId }: { temaId: NonNullable<temas["id"]>; }): Promise<subtemas[]> {
+    create(data: Prisma.temasUncheckedCreateInput): Promise<temas> {
+        return this.prisma.temas.create({
+            data,
+        })
+    }
+    getSubtemasByTema({
+        temaId,
+    }: { temaId: NonNullable<temas['id']> }): Promise<subtemas[]> {
         return this.prisma.subtemas.findMany({
             where: { tema_id: temaId },
-        });
+        })
     }
-    findByName({ nome }: Pick<temas, "nome">): Promise<temas | null> {
-        return this.prisma.temas.findUnique({
+    findByName({ nome }: Pick<temas, 'nome'>): Promise<temas | null> {
+        return this.prisma.temas.findFirst({
             where: { nome },
-        });
+        })
     }
 
     async findAll() {
-        return this.prisma.temas.findMany();
+        return this.prisma.temas.findMany()
     }
 
     async findById({ id }: Pick<temas, 'id'>) {
         return this.prisma.temas.findUnique({
             where: { id },
-        });
+        })
     }
 
     async delete({ id }: Pick<temas, 'id'>) {
         await this.prisma.temas.delete({
             where: { id },
-        });
+        })
     }
 
     /* async checkIfExists(id: number): Promise<boolean> {
