@@ -103,3 +103,7 @@ http://localhost:3000/api-docs
 4. Envie para a branch principal (git push origin feature/nova-feature).
 
 5. Abra um Pull Request.
+
+## ✅ Status
+
+🚧 Projeto em desenvolvimento 🚧
