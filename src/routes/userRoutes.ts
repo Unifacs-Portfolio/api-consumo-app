@@ -8,11 +8,32 @@ import {
     resetPasswordUser,
     showUser,
     updateUser,
+    getProfile,
 } from '../controllers/userController'
 import userUpload from '../middlewares/uploadMiddleware'
 import authMiddleware from '../middlewares/authMiddleware'
 
 const router: Router = Router()
+/**
+ * @swagger
+ * /api/usuario/me:
+ *   get:
+ *     summary: Obtém informações do usuário autenticado
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Retorna as informações do usuário autenticado, incluindo nome, e-mail, telefone, nível de consciência e se é monitor.
+ *     responses:
+ *       200:
+ *         description: Informações do usuário
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.get('/usuario/me', authMiddleware, getProfile)
 
 /**
  * @swagger
@@ -75,6 +96,44 @@ router.post('/usuario', userUpload.single('avatar'), storeUser)
  *                 description: Senha do usuário para autenticação
  *     responses:
  *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       example: '123e4567-e89b-12d3-a456-426614174000'
+ *                       description: ID do usuário
+ *                     email:
+ *                       type: string
+ *                       format: email
+ *                       example: 'usuario@example.com'
+ *                       description: E-mail do usuário
+ *                     nome:
+ *                       type: string
+ *                       format: string
+ *                       example: 'Nome do Usuário'
+ *                       description: Nome do usuário
+ *                     telefone:
+ *                       type: string
+ *                       format: string
+ *                       example: '11987654321'
+ *                       description: Telefone do usuário
+ *                     nivelConsciencia:
+ *                       type: integer
+ *                       format: int32
+ *                       example: 3
+ *                       description: Nível de conscientização do usuário (0-5)
+ *                     isMonitor:
+ *                       type: boolean
+ *                       format: boolean
+ *                       example: false
+ *                       description: Indica se o usuário é monitor
  *         description: Login bem-sucedido, retorna um token JWT
  *       400:
  *         description: Credenciais inválidas ou erro de autenticação
