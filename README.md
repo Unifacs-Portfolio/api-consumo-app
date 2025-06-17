@@ -75,7 +75,12 @@ JWT_SECRET=sua_chave_secreta
 
 4. Execute as migrações do banco de dados:
 ```bash
-npx sequelize db:migrate
+npx npx generate
+```
+
+4.1 Caso queira visualizar o banco de dados pelo prisma o comando é:
+```bash
+npx prisma studio
 ```
 
 5. Inicie a aplicação:
@@ -193,7 +198,7 @@ Exemplo com curl:
 curl -H "Authorization: Bearer SEU_TOKEN_AQUI" http://localhost:3000/api-docs
 ```
 
-4. Endpoints protegidos (requere token JWT)
+4. Endpoints protegidos (requer token JWT)
 4.1 Usuários
 -GET /api/usuario — Lista todos os usuários
 -GET /api/usuario/:id — Retorna dados de um usuário específico
