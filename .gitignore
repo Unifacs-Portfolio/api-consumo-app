@@ -30,7 +30,6 @@ docker-compose.yml
 .dockerignore
 
 # IDE and Editor files
-.vscode/
 .idea/
 *.sublime-workspace
 *.sublime-project

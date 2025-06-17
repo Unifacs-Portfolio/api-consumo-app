@@ -1,9 +1,18 @@
-import { Router } from 'express';
-import userController from '../controllers/userController';
-import userUpload from "../middlewares/uploadMiddleware"; 
-import authMiddleware from "../middlewares/authMiddleware"; 
- 
-const router: Router = Router();
+import { Router } from 'express'
+import {
+    storeUser,
+    deleteUser,
+    indexUser,
+    loginUser,
+    resetPasswordRequestUser,
+    resetPasswordUser,
+    showUser,
+    updateUser,
+} from '../controllers/userController'
+import userUpload from '../middlewares/uploadMiddleware'
+import authMiddleware from '../middlewares/authMiddleware'
+
+const router: Router = Router()
 
 /**
  * @swagger
@@ -33,7 +42,7 @@ const router: Router = Router();
  *                 description: Nível de conscientização do usuário (0-5)
  *               isMonitor:
  *                 type: boolean
- *               fotoUsu:
+ *               avatar:
  *                 type: string
  *                 format: binary
  *                 description: Imagem de perfil do usuário
@@ -43,7 +52,7 @@ const router: Router = Router();
  *       400:
  *         description: Erro na criação do usuário
  */
-router.post('/usuario', userUpload.single('fotoUsu'), userController.store);
+router.post('/usuario', userUpload.single('avatar'), storeUser)
 
 /**
  * @swagger
@@ -72,7 +81,7 @@ router.post('/usuario', userUpload.single('fotoUsu'), userController.store);
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/usuario/login', userController.loginUser);
+router.post('/usuario/login', loginUser)
 
 /**
  * @swagger
@@ -101,7 +110,7 @@ router.post('/usuario/login', userController.loginUser);
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/usuario/reset', userController.resetPasswordRequest);
+router.post('/usuario/reset', resetPasswordRequestUser)
 
 /**
  * @swagger
@@ -135,7 +144,7 @@ router.post('/usuario/reset', userController.resetPasswordRequest);
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/usuario/reset/:token', userController.resetPassword);
+router.post('/usuario/reset/:token', resetPasswordUser)
 
 /**
  * @swagger
@@ -150,22 +159,24 @@ router.post('/usuario/reset/:token', userController.resetPassword);
  *         description: Lista de usuários
  *       400:
  *         description: Erro ao buscar usuários
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/usuario', authMiddleware, userController.index);
+router.get('/usuario', authMiddleware, indexUser)
 
 /**
  * @swagger
- * /api/usuario/{email}:
+ * /api/usuario/{id}:
  *   get:
- *     summary: Obtém um usuário pelo email
+ *     summary: Obtém um usuário pelo ID
  *     tags: [Usuários]
  *     parameters:
  *       - in: path
- *         name: email
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
- *         description: Email do usuário
+ *         description: ID do usuário
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -173,22 +184,26 @@ router.get('/usuario', authMiddleware, userController.index);
  *         description: Informações do usuário
  *       404:
  *         description: Usuário não encontrado
+ *       400:
+ *         description: Erro ao buscar usuário
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.get('/usuario/:email', authMiddleware, userController.show);
+router.get('/usuario/:id', authMiddleware, showUser)
 
 /**
  * @swagger
- * /api/usuario/{email}:
+ * /api/usuario/{id}:
  *   put:
  *     summary: Atualiza um usuário
  *     tags: [Usuários]
  *     parameters:
  *       - in: path
- *         name: email
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
- *         description: Email do usuário
+ *         description: ID do usuário
  *     requestBody:
  *       required: true
  *       content:
@@ -207,7 +222,7 @@ router.get('/usuario/:email', authMiddleware, userController.show);
  *               senha:
  *                 type: string
  *                 description: Nova senha do usuário, caso queira alterar
- *               fotoUsu:
+ *               avatar:
  *                 type: string
  *                 format: binary
  *                 description: Imagem de perfil do usuário
@@ -220,22 +235,29 @@ router.get('/usuario/:email', authMiddleware, userController.show);
  *         description: Erro ao atualizar o usuário
  *       404:
  *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.put('/usuario/:email', authMiddleware, userUpload.single('fotoUsu'), userController.update);
+router.put(
+    '/usuario/:id',
+    authMiddleware,
+    userUpload.single('avatar'),
+    updateUser,
+)
 
 /**
  * @swagger
- * /api/usuario/{email}:
+ * /api/usuario/{id}:
  *   delete:
- *     summary: Deleta um usuário pelo email
+ *     summary: Deleta um usuário pelo ID
  *     tags: [Usuários]
  *     parameters:
  *       - in: path
- *         name: email
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
- *         description: Email do usuário
+ *         description: ID do usuário
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -245,7 +267,9 @@ router.put('/usuario/:email', authMiddleware, userUpload.single('fotoUsu'), user
  *         description: Usuário não encontrado
  *       400:
  *         description: Erro ao deletar o usuário
+ *       500:
+ *         description: Erro interno do servidor
  */
-router.delete('/usuario/:email', authMiddleware, userController.delete);
+router.delete('/usuario/:id', authMiddleware, deleteUser)
 
-export default router;
+export default router
