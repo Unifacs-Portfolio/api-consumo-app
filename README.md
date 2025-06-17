@@ -126,6 +126,18 @@ npm start
 - `DELETE /api/receitas/:id` - Remove receita
 - `PATCH /api/receitas/:id/verificar` - Verifica receita
 
+### Quiz
+- `GET /quiz` - Lista todos os quizzes
+- `POST /quiz` - Cria novo quiz
+- `GET /quiz/:id` - Busca quiz por ID
+- `PUT /quiz/:id` - Atualiza quiz
+- `DELETE /quiz/:id` - Remove quiz
+- `GET /quiz/tema/:tema` - Lista quizzes por tema
+- `POST /quiz/:id/responder` - Envia resposta para um quiz
+- `GET /quiz/:id/resultados` - Obtém resultados do quiz
+- `GET /quiz/ranking` - Lista ranking de jogadores
+- `GET /quiz/usuario/:id/historico` - Histórico de quizzes do usuário
+
 ### Temas e Subtemas
 - `GET /api/:tema/receitas` - Lista receitas por tema
 - `GET /api/receitas/:tema/:subtema` - Lista receitas por tema e subtema
