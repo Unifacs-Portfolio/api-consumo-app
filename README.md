@@ -17,47 +17,30 @@ Esta é uma API RESTful desenvolvida em Node.js utilizando o framework Express p
 ## Estrutura de Pastas
 
 ```bash
-api-consumo-app/                   # Diretório raiz do projeto
-│
-├── /node_modules                  # Dependências instaladas via npm/yarn
-│
-├── /prisma                        # Configuração e migrações do Prisma ORM
-│   ├── /migrations                # Histórico de migrações do banco de dados
-│   └── schema.prisma              # Definição do schema do banco de dados
-│
-├── /src                           # Diretório do código fonte
-│   │
-│   ├── /controller                # Manipuladores de requisições e lógica de negócio
-│   │   ├── authController.ts      # Lógica de autenticação e autorização
-│   │   ├── recipeController.ts    # Lógica de gerenciamento de receitas
-│   │   └── usuarioController.ts   # Lógica de gerenciamento de usuários
-│   │
-│   ├── /database                  # Configuração e conexões do banco de dados
-│   │   └── client.ts              # Configuração da instância do cliente Prisma
-│   │
-│   ├── /interfaces                # Interfaces e tipos do TypeScript
-│   │   └── auth.interface.ts      # Interfaces relacionadas à autenticação
-│   │
-│   ├── /middleware                # Funções de middleware do Express
-│   │   └── auth.middleware.ts     # Middleware de autenticação
-│   │
-│   ├── /routes                    # Definições das rotas da API
-│   │   ├── authRoutes.ts          # Rotas de autenticação
-│   │   ├── recipeRoutes.ts        # Rotas de gerenciamento de receitas
-│   │   └── usuarioRoutes.ts       # Rotas de gerenciamento de usuários
-│   │
-│   ├── /utils                     # Funções utilitárias e auxiliares
-│   │   └── jwt.utils.ts           # Utilitários para manipulação de JWT
-│   │
-│   ├── app.ts                     # Configuração do aplicativo Express
-│   └── server.ts                  # Ponto de entrada do servidor
-│
-├── .env                           # Variáveis de ambiente
-├── .gitignore                     # Regras de ignorar arquivos do Git
-├── package-lock.json              # Arquivo de bloqueio de dependências
-├── package.json                   # Metadados do projeto e dependências
-├── README.md                      # Documentação do projeto
-└── tsconfig.json                  # Configuração do TypeScript
+api-consumo-app/             # Diretório raiz do projeto
+├── .github/                 # Configurações específicas do GitHub (ex: workflows, templates de issues)
+├── .vscode/                 # Configurações e definições do editor VS Code
+├── generated/               # Arquivos gerados automaticamente (ex: código, tipos)
+├── node_modules/            # Dependências instaladas pelo npm ou yarn
+├── prisma/                  # Arquivos relacionados ao Prisma ORM (ex: schema, migrações)
+├── src/                     # Código-fonte da aplicação
+│   ├── controllers/         # Lida com requisições recebidas e orquestra as respostas
+│   ├── middlewares/         # Funções que são executadas antes ou depois dos manipuladores de rota
+│   ├── models/              # Define as estruturas de dados e interage com o banco de dados
+│   ├── repositories/        # Camada de abstração para acesso a dados (ex: operações de banco de dados)
+│   ├── routes/              # Define os endpoints da API e seus respectivos manipuladores
+│   ├── utils/               # Funções utilitárias e módulos auxiliares
+│   ├── app.ts               # Ponto de entrada principal da aplicação (ex: instância do aplicativo Express)
+│   ├── db.ts                # Conexão e configuração do banco de dados
+│   └── server.ts            # Configura e inicia o servidor da aplicação
+├── .env                     # Variáveis de ambiente (local - geralmente não é commitado)
+├── .env.example             # Exemplo das variáveis de ambiente necessárias para o projeto
+├── .gitignore               # Especifica arquivos intencionalmente não rastreados para ignorar pelo Git
+├── biome.json               # Configuração para Biome (formatador/linter/etc.)
+├── package-lock.json        # Garante que as dependências instaladas sejam consistentes entre diferentes ambientes
+├── package.json             # Metadados do projeto e definições de scripts
+├── README.md                # Arquivo README do projeto
+└── tsconfig.json            # Configuração do compilador TypeScript
 ```
 
 ## Pré-requisitos
@@ -99,7 +82,7 @@ npx sequelize db:migrate
 ```bash
 npm run dev
 ```
-A aplicação estará disponível em http://localhost:3000.
+A aplicação estará disponível em http://localhost:3000/api-docs.
 
 ## Executando a Aplicação
 
@@ -137,10 +120,10 @@ npm start
 ### Quiz
 - `GET /api/quizes` - Lista todos os quizzes
 - `POST /api/quizes` - Cria um novo quiz
-- `GET /api/quizes/:quizId` - Obtém um quiz pelo ID
-- `PUT /api/quizes/:quizId` - Atualiza um quiz pelo ID
-- `DELETE /api/quizes/:quizId` - Remove quiz pelo ID
-- `POST /api/quizes/:quizId/validar` - Valida a resposta de um quiz
+- `GET /api/quizes/:{quizId}` - Obtém um quiz pelo ID
+- `PUT /api/quizes/:{quizId}` - Atualiza um quiz pelo ID
+- `DELETE /api/quizes/:{quizId}` - Remove quiz pelo ID
+- `POST /api/quizes/:{quizId}/validar` - Valida a resposta de um quiz
 
 ### Receitas
 - `POST /api/receitas` - Cria uma nova receita
@@ -163,9 +146,9 @@ npm start
 ### Usuários
 - `POST /api/usuario` - Cria um novo usuário
 - `GET /api/usuario` - Lista todos usuários
-- `GET /api/usuario/:id` - Obtém um usuário pelo ID
-- `PUT /api/usuario/:id` - Atualiza um usuário
-- `DELETE /api/usuario/:id` - Deleta um usuário pelo ID
+- `GET /api/usuario/{id}` - Obtém um usuário pelo ID
+- `PUT /api/usuario/{id}` - Atualiza um usuário
+- `DELETE /api/usuario/{id}` - Deleta um usuário pelo ID
 
 ### Autenticação
 Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O fluxo básico é:
@@ -207,24 +190,21 @@ Authorization: Bearer SEU_TOKEN_AQUI
 
 Exemplo com curl:
 ```bash
-curl -H "Authorization: Bearer SEU_TOKEN_AQUI" http://localhost:3000/users
+curl -H "Authorization: Bearer SEU_TOKEN_AQUI" http://localhost:3000/api-docs
 ```
 
 4. Endpoints protegidos (requere token JWT)
 4.1 Usuários
--GET /users — Lista todos os usuários
--GET /users/:id — Retorna dados de um usuário específico
--PUT /users/:id — Atualiza os dados de um usuário
--DELETE /users/:id — Remove um usuário
+-GET /api/usuario — Lista todos os usuários
+-GET /api/usuario/:id — Retorna dados de um usuário específico
+-PUT /api/usuario/:id — Atualiza os dados de um usuário
+-DELETE /api/usuario/:id — Remove um usuário
 
 4.2 Postagens
--GET /posts — Lista todas as postagens
--POST /posts — Cria nova postagem
--PUT /posts/:id — Atualiza uma postagem
--DELETE /posts/:id — Deleta uma postagem
-
-5. Dicas, Ingredientes e Temas
-Rotas seguem o mesmo padrão de CRUD (GET, POST, PUT, DELETE) e estão organizadas por categoria (moda, culinária, estética, etc), conforme o escopo do projeto.
+-GET /api/receitas — Lista todas as postagens
+-POST /api/receitas — Cria nova postagem
+-PUT /api/receitas/:id — Atualiza uma postagem
+-DELETE /api/receitas/:id — Deleta uma postagem
 
 ## Teste
 ```bash
@@ -239,7 +219,7 @@ npm run test:coverage
 
 A documentação da API é gerada automaticamente utilizando o Swagger. Após iniciar o servidor, acesse a documentação via:
 
-http://localhost:3000/docs
+http://localhost:3000/api-docs
 
 
 ## Contribuição
