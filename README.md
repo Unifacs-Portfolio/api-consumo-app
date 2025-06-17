@@ -114,33 +114,58 @@ npm start
 
 ## Rotas da API
 
-### Usuários
-- `POST /api/users/register` - Cadastro de usuários
-- `POST /api/users/login` - Autenticação
-- `GET /api/users` - Lista usuários
+### Dicas
+- `GET /api/dicas` - Lista todas as dicas
+- `POST /api/dicas` - Cria uma nova dica
+- `PUT /api/dicas/{id}` - Atualiza uma dica
+- `GET /api/dicas/{id}` - Obtém uma dica pelo ID
+- `DELETE /api/dicas/{id}` - Deleta uma dica pelo ID
+- `PATCH /api/dicas/{id}/verificar` - Verifica uma dica
+- `GET /api/{tema}/dicas` - Lista dicas por tema
+- `GET /api/{tema}/dicas/verificadas` - Lista dicas verificadas por tema
+- `GET /api/{tema}/dicas/nao-verificadas` - Lista dicas não verificadas por tema
+- `GET /api/dicas/{tema}/{subtema}` - Lista dicas por tema e subtema
+- `GET /api/{tema}/dicas/especialistas` - Lista dicas de especialistas por tema
 
-### Receitas
-- `GET /api/receitas` - Lista todas as receitas
-- `POST /api/receitas` - Cria nova receita
-- `PUT /api/receitas/:id` - Atualiza receita
-- `DELETE /api/receitas/:id` - Remove receita
-- `PATCH /api/receitas/:id/verificar` - Verifica receita
+### Ingredientes
+- `GET /api/ingredientes` - Lista todas os ingredientes
+- `POST /api/ingredientes` - Cria um novo ingrediente
+- `PUT /api/ingredientes/{ingredienteId}` - Atualiza um ingrediente pelo ID
+- `GET /api/ingredientes/{ingredienteId}` - Obtém um ingrediente pelo ID
+- `DELETE /api/ingredientes/{ingredienteId}` - Remove um ingrediente pelo ID
 
 ### Quiz
-- `GET /quiz` - Lista todos os quizzes
-- `POST /quiz` - Cria novo quiz
-- `GET /quiz/:id` - Busca quiz por ID
-- `PUT /quiz/:id` - Atualiza quiz
-- `DELETE /quiz/:id` - Remove quiz
-- `GET /quiz/tema/:tema` - Lista quizzes por tema
-- `POST /quiz/:id/responder` - Envia resposta para um quiz
-- `GET /quiz/:id/resultados` - Obtém resultados do quiz
-- `GET /quiz/ranking` - Lista ranking de jogadores
-- `GET /quiz/usuario/:id/historico` - Histórico de quizzes do usuário
+- `GET /api/quizes` - Lista todos os quizzes
+- `POST /api/quizes` - Cria um novo quiz
+- `GET /api/quizes/:quizId` - Obtém um quiz pelo ID
+- `PUT /api/quizes/:quizId` - Atualiza um quiz pelo ID
+- `DELETE /api/quizes/:quizId` - Remove quiz pelo ID
+- `POST /api/quizes/:quizId/validar` - Valida a resposta de um quiz
 
-### Temas e Subtemas
-- `GET /api/:tema/receitas` - Lista receitas por tema
-- `GET /api/receitas/:tema/:subtema` - Lista receitas por tema e subtema
+### Receitas
+- `POST /api/receitas` - Cria uma nova receita
+- `GET /api/receitas` - Lista todas as receitas
+- `GET /api/receitas/{id}` - Obtém uma receita pelo ID
+- `PUT /api/receitas/{id}` - Atualiza uma receita pelo ID
+- `DELETE /api/receitas/{id}` - Deleta uma receita pelo ID
+- `PATCH /api/receitas/{id}/verificar` - Verifica uma receita
+- `GET /api/{tema}/receitas` - Lista receitas por tema
+- `GET /api/{tema}/receitas/verificadas` - Lista receitas verificadas por tema
+- `GET /api/{tema}/receitas/nao-verificadas`- Lista receitas não verificadas por tema
+- `GET /api/receitas/{tema}/{subtema}` - Lista receitas por tema e subtema
+
+### Tema 
+- `GET /api/tema` - Lista todos os temas
+- `GET /api/tema/{id}` - Verifica se um tema existe por ID
+- `DELETE /api/tema/{id}` - Remove um tema pelo ID
+- `GET /api/tema/{tema}/subtemas` - Lista subtemas de um tema
+
+### Usuários
+- `POST /api/usuario` - Cria um novo usuário
+- `GET /api/usuario` - Lista todos usuários
+- `GET /api/usuario/:id` - Obtém um usuário pelo ID
+- `PUT /api/usuario/:id` - Atualiza um usuário
+- `DELETE /api/usuario/:id` - Deleta um usuário pelo ID
 
 ### Autenticação
 Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O fluxo básico é:
