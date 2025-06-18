@@ -9,7 +9,6 @@ Esta é uma API RESTful desenvolvida em Node.js utilizando o framework Express p
 - **PostgreSQL**: Banco de dados relacional.
 - **Prisma**: ORM para gerenciamento do banco de dados
 - **JWT (JsonWebToken)**: Autenticação e segurança de rotas.
-- **Jest**: Framework de testes unitários e de integração.
 - **Supabase**: Armazenamento de arquivos e gerenciamento de banco de dados
 - **Zod**: Validação de schemas
 - **Swagger**: Documentação da API.
@@ -44,7 +43,6 @@ api-consumo-app/             # Diretório raiz do projeto
 ```
 
 ## Pré-requisitos
-
 Antes de iniciar, certifique-se de ter o seguinte instalado:
 
 - Node.js (v14 ou superior)
@@ -66,28 +64,26 @@ npm install
 ```
 
 3. Configure as variáveis de ambiente:
-Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
+Crie um arquivo .env na raiz do projeto tendo como EXEMPLO as seguintes variáveis:
 ```env
-PORT=3000
-DATABASE_URL=postgres://usuario:senha@localhost:5432/nome_do_banco
-JWT_SECRET=sua_chave_secreta
+DATABASE_URL="postgresql://user:password@host:port/database"
+DIRECT_URL="postgresql://user:password@host:port/database?schema=public"
+NEXT_PUBLIC_SUPABASE_URL="https://your-project-id.supabase.co"
+NEXT_PUBLIC_SUPABASE_KEY="your-anon-public-key"
+JWT_SECRET="a_very_strong_and_random_secret_key"
+EMAIL_USER="your-email@example.com"
+EMAIL_PASS="your-email-password-or-app-key"
 ```
 
 4. Execute as migrações do banco de dados:
 ```bash
-npx npx generate
+npx prisma generate
 ```
 
 4.1 Caso queira visualizar o banco de dados pelo prisma o comando é:
 ```bash
 npx prisma studio
 ```
-
-5. Inicie a aplicação:
-```bash
-npm run dev
-```
-A aplicação estará disponível em http://localhost:3000/api-docs.
 
 ## Executando a Aplicação
 
@@ -101,6 +97,12 @@ npm start
 ```
 
 ## Rotas da API
+
+### Documentação da API
+
+A documentação da API é gerada automaticamente utilizando o Swagger. Após iniciar o servidor, acesse a documentação via:
+
+https://api-consumo-app.onrender.com/api-docs/
 
 ### Dicas
 - `GET /api/dicas` - Lista todas as dicas
@@ -149,6 +151,7 @@ npm start
 - `GET /api/tema/{tema}/subtemas` - Lista subtemas de um tema
 
 ### Usuários
+- `GET /api/usuario/me` - Obtém informações do usuário autenticado
 - `POST /api/usuario` - Cria um novo usuário
 - `GET /api/usuario` - Lista todos usuários
 - `GET /api/usuario/{id}` - Obtém um usuário pelo ID
@@ -163,10 +166,15 @@ Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O 
 -Descrição: Cadastra um novo usuário.
 -Exemplo de corpo da requisição:
 ```json
-{
-  "nome": "João",
-  "email": "joao@example.com",
-  "senha": "123456"
+registro: {
+ "email": "teste1@gmail.com",
+ "tokens": "153587",
+ "senha": "senha123",
+ "nome": "Sinval",
+ "telefone": "123456787",
+ "nivelConsciencia": "1",
+ "isMonitor": false,
+ "fotoUsu": "https://github.com/Sinvalluz.png"
 }
 ```
 
@@ -176,8 +184,8 @@ Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O 
 -Exemplo de corpo da requisição:
 ```json
 {
-  "email": "joao@example.com",
-  "senha": "123456"
+  "email": "teste1@gmail.com",
+  "senha": "senha123"
 }
 ```
 -Exemplo de resposta:
@@ -198,33 +206,56 @@ Exemplo com curl:
 curl -H "Authorization: Bearer SEU_TOKEN_AQUI" http://localhost:3000/api-docs
 ```
 
-4. Endpoints protegidos (requer token JWT)
-4.1 Usuários
--GET /api/usuario — Lista todos os usuários
--GET /api/usuario/:id — Retorna dados de um usuário específico
--PUT /api/usuario/:id — Atualiza os dados de um usuário
--DELETE /api/usuario/:id — Remove um usuário
+## 4. Endpoints Protegidos (Requer Token JWT)
 
-4.2 Postagens
--GET /api/receitas — Lista todas as postagens
--POST /api/receitas — Cria nova postagem
--PUT /api/receitas/:id — Atualiza uma postagem
--DELETE /api/receitas/:id — Deleta uma postagem
+### 4.1 Dicas
 
-## Teste
-```bash
-# Executa todos os testes
-npm test
+- **POST** `/api/dicas`  
+  Cria uma nova dica.
 
-# Executa testes com coverage
-npm run test:coverage
-```
+- **PUT** `/api/dicas/{id}`  
+  Atualiza uma dica.
 
-## Documentação da API
+- **DELETE** `/api/dicas/{id}`  
+  Deleta uma dica pelo ID.
 
-A documentação da API é gerada automaticamente utilizando o Swagger. Após iniciar o servidor, acesse a documentação via:
+- **PATCH** `/api/dicas/{id}/verificar`  
+  Verifica uma dica.
 
-http://localhost:3000/api-docs
+---
+
+### 4.2 Tema
+
+- **GET** `/api/tema`  
+  Lista todos os temas.
+
+- **GET** `/api/tema/{id}`  
+  Verifica se um tema existe por ID.
+
+- **DELETE** `/api/tema/{id}`  
+  Remove um tema pelo ID.
+
+- **GET** `/api/tema/{tema}/subtemas`  
+  Lista subtemas de um tema.
+
+---
+
+### 4.3 Usuários
+
+- **GET** `/api/usuario/me`  
+  Obtém informações do usuário autenticado.
+
+- **GET** `/api/usuario`  
+  Lista todos os usuários.
+
+- **GET** `/api/usuario/{id}`  
+  Retorna dados de um usuário específico.
+
+- **PUT** `/api/usuario/{id}`  
+  Atualiza os dados de um usuário.
+
+- **DELETE** `/api/usuario/{id}`  
+  Remove um usuário.
 
 
 ## Contribuição
