@@ -6,10 +6,34 @@ import type { RequestHandler } from 'express'
 import { PrismaUsuarioRepository } from '../repositories/prisma/PrismaUsuarioRepository'
 import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
+import type { UserJwtPayload } from '../types/user-jwt-payload'
 
 const BUCKET_NAME = 'photos'
 const FOLDER_NAME = 'fotosPerfil'
 const userPrismaRepository = new PrismaUsuarioRepository()
+
+export const getProfile: RequestHandler = async (req, res, next) => {
+    try {
+        const { userId } = req.user
+        const user = await userPrismaRepository.findById(userId)
+        if (!user) {
+            res.status(404).json({ error: 'Usuário não encontrado' })
+            return
+        }
+        res.status(200).json({
+            user: {
+                email: user.email,
+                nome: user.nome,
+                telefone: user.telefone,
+                nivel_consciencia: user.nivel_consciencia,
+                is_monitor: user.is_monitor,
+                foto_usuario: user.foto_usuario,
+            },
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 const storeUserSchema = z.object({
     nome: z
@@ -327,9 +351,12 @@ export const loginUser: RequestHandler = async (req, res, next) => {
             res.status(401).json({ error: 'Credenciais inválidas' })
             return
         }
-
+        const userAuthenticated: UserJwtPayload = {
+            userId: user.id,
+            email: user.email,
+        }
         const token = jwt.sign(
-            { userID: user.id, email: user.email },
+            userAuthenticated,
             process.env.JWT_SECRET as string,
         )
 
@@ -385,7 +412,21 @@ export const resetPasswordRequestUser: RequestHandler = async (
             from: process.env.EMAIL_USER,
             to: user.email,
             subject: 'Redefinição de Senha',
-            html: `<p>Seu token de redefinição de senha é:</p><p><strong>${token}</strong></p>`,
+            html: `
+            <h2>Redefinição de Senha</h2>
+
+            <p>Olá,</p>
+
+            <p>Recebemos uma solicitação para redefinir a sua senha. Para continuar, utilize o código abaixo:</p>
+
+            <p style="font-size: 20px; font-weight: bold; color:rgb(35, 98, 167);">${token}</p>
+
+            <p>Este código é válido por <strong>1 hora</strong>.</p>
+
+            <p>Se você não solicitou esta alteração, pode desconsiderar este e-mail com segurança.</p>
+
+            <p>Atenciosamente,<br>Sua equipe de suporte</p>
+            `,
         }
 
         await transporter.sendMail(mailOptions)
