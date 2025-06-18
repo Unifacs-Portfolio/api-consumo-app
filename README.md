@@ -102,6 +102,8 @@ npm start
 
 ## Rotas da API
 
+Link da documentação: https://api-consumo-app.onrender.com
+
 ### Dicas
 - `GET /api/dicas` - Lista todas as dicas
 - `POST /api/dicas` - Cria uma nova dica
