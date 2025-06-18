@@ -9,7 +9,6 @@ Esta é uma API RESTful desenvolvida em Node.js utilizando o framework Express p
 - **PostgreSQL**: Banco de dados relacional.
 - **Prisma**: ORM para gerenciamento do banco de dados
 - **JWT (JsonWebToken)**: Autenticação e segurança de rotas.
-- **Jest**: Framework de testes unitários e de integração.
 - **Supabase**: Armazenamento de arquivos e gerenciamento de banco de dados
 - **Zod**: Validação de schemas
 - **Swagger**: Documentação da API.
@@ -44,7 +43,6 @@ api-consumo-app/             # Diretório raiz do projeto
 ```
 
 ## Pré-requisitos
-
 Antes de iniciar, certifique-se de ter o seguinte instalado:
 
 - Node.js (v14 ou superior)
@@ -168,10 +166,15 @@ Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O 
 -Descrição: Cadastra um novo usuário.
 -Exemplo de corpo da requisição:
 ```json
-{
-  "nome": "João",
-  "email": "joao@example.com",
-  "senha": "123456"
+registro: {
+ "email": "teste1@gmail.com",
+ "tokens": "153587",
+ "senha": "senha123",
+ "nome": "Sinval",
+ "telefone": "123456787",
+ "nivelConsciencia": "1",
+ "isMonitor": false,
+ "fotoUsu": "https://github.com/Sinvalluz.png"
 }
 ```
 
@@ -181,8 +184,8 @@ Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O 
 -Exemplo de corpo da requisição:
 ```json
 {
-  "email": "joao@example.com",
-  "senha": "123456"
+  "email": "teste1@gmail.com",
+  "senha": "senha123"
 }
 ```
 -Exemplo de resposta:
@@ -203,25 +206,56 @@ Exemplo com curl:
 curl -H "Authorization: Bearer SEU_TOKEN_AQUI" http://localhost:3000/api-docs
 ```
 
-4. Endpoints protegidos (requer token JWT)
-4.1 Dicas
--POST /api/dicas - Cria uma nova dica
--PUT /api/dicas/{id} - Atualiza uma dica
--DELETE /api/dicas/{id} - Deleta uma dica pelo ID
--PATCH /api/dicas/{id}/verificar - Verifica uma dica
+## 4. Endpoints Protegidos (Requer Token JWT)
 
-4.2 Tema
--GET /api/tema - Lista todos os temas
--GET /api/tema/{id} - Verifica se um tema existe por ID
--DELETE /api/tema/{id} - Remove um tema pelo ID
--GET /api/tema/{tema}/subtemas - Lista subtemas de um tema
+### 4.1 Dicas
 
-4.3 Usuários
--GET /api/usuario/me — Obtém informações do usuário autenticado
--GET /api/usuario — Lista todos os usuários
--GET /api/usuario/:id — Retorna dados de um usuário específico
--PUT /api/usuario/:id — Atualiza os dados de um usuário
--DELETE /api/usuario/:id — Remove um usuário
+- **POST** `/api/dicas`  
+  Cria uma nova dica.
+
+- **PUT** `/api/dicas/{id}`  
+  Atualiza uma dica.
+
+- **DELETE** `/api/dicas/{id}`  
+  Deleta uma dica pelo ID.
+
+- **PATCH** `/api/dicas/{id}/verificar`  
+  Verifica uma dica.
+
+---
+
+### 4.2 Tema
+
+- **GET** `/api/tema`  
+  Lista todos os temas.
+
+- **GET** `/api/tema/{id}`  
+  Verifica se um tema existe por ID.
+
+- **DELETE** `/api/tema/{id}`  
+  Remove um tema pelo ID.
+
+- **GET** `/api/tema/{tema}/subtemas`  
+  Lista subtemas de um tema.
+
+---
+
+### 4.3 Usuários
+
+- **GET** `/api/usuario/me`  
+  Obtém informações do usuário autenticado.
+
+- **GET** `/api/usuario`  
+  Lista todos os usuários.
+
+- **GET** `/api/usuario/{id}`  
+  Retorna dados de um usuário específico.
+
+- **PUT** `/api/usuario/{id}`  
+  Atualiza os dados de um usuário.
+
+- **DELETE** `/api/usuario/{id}`  
+  Remove um usuário.
 
 
 ## Contribuição
