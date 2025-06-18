@@ -166,7 +166,7 @@ Esta API utiliza autenticação via JWT (JSON Web Token) para proteger rotas. O 
 -Descrição: Cadastra um novo usuário.
 -Exemplo de corpo da requisição:
 ```json
-registro: {
+{
  "email": "teste1@gmail.com",
  "tokens": "153587",
  "senha": "senha123",
